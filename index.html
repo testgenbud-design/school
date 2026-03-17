@@ -4,978 +4,162 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TestGen AI — CBSE Test Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 <style>
-:root {
-  --bg:        #080C14;
-  --bg2:       #0D1420;
-  --bg3:       #121A2B;
-  --panel:     #0F1729;
-  --border:    rgba(255,255,255,0.07);
-  --border2:   rgba(255,255,255,0.12);
-  --amber:     #F5A623;
-  --amber2:    #FFB84D;
-  --amber-dim: rgba(245,166,35,0.12);
-  --blue:      #3B82F6;
-  --blue-dim:  rgba(59,130,246,0.1);
-  --green:     #10B981;
-  --green-dim: rgba(16,185,129,0.1);
-  --red:       #EF4444;
-  --text:      #E8EDF5;
-  --text2:     #8892A4;
-  --text3:     #4A5568;
-  --ff:        'Bricolage Grotesque', sans-serif;
-  --mono:      'JetBrains Mono', monospace;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
 body {
-  font-family: var(--ff);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
+  font-family: Arial;
+  background: #0b1220;
+  color: white;
+  padding: 40px;
 }
-
-/* Animated grid background */
-body::before {
-  content: '';
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
-  background-size: 48px 48px;
-}
-
-/* Glow orbs */
-body::after {
-  content: '';
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 600px 400px at 20% 10%, rgba(245,166,35,0.04) 0%, transparent 70%),
-    radial-gradient(ellipse 500px 500px at 80% 80%, rgba(59,130,246,0.05) 0%, transparent 70%);
-}
-
-#root { position: relative; z-index: 1; }
-
-/* ── NAV ── */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  height: 56px; display: flex; align-items: center; justify-content: space-between;
-  padding: 0 32px;
-  background: rgba(8,12,20,0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-}
-.nav-logo {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 17px; font-weight: 700; letter-spacing: -0.5px; color: var(--text);
-}
-.nav-logo-mark {
-  width: 28px; height: 28px; border-radius: 7px;
-  background: linear-gradient(135deg, var(--amber), #E8820A);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 800; color: #fff;
-  box-shadow: 0 0 16px rgba(245,166,35,0.35);
-}
-.nav-right { display: flex; align-items: center; gap: 12px; }
-.nav-tag {
-  font-family: var(--mono); font-size: 10px; font-weight: 400;
-  color: var(--amber); background: var(--amber-dim);
-  border: 1px solid rgba(245,166,35,0.2);
-  padding: 3px 9px; border-radius: 4px; letter-spacing: 1px;
-}
-.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
-.nav-status { font-size: 11px; color: var(--text2); }
-
-/* ── HERO ── */
-.hero {
-  padding: 120px 32px 60px;
-  max-width: 960px; margin: 0 auto;
-  text-align: center;
-}
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 11px; color: var(--amber);
-  background: var(--amber-dim); border: 1px solid rgba(245,166,35,0.2);
-  padding: 5px 14px; border-radius: 20px; margin-bottom: 24px;
-  letter-spacing: 1.5px; text-transform: uppercase;
-}
-.hero-h1 {
-  font-size: clamp(36px, 5vw, 64px); font-weight: 800;
-  line-height: 1.05; letter-spacing: -2px;
-  color: var(--text); margin-bottom: 18px;
-}
-.hero-h1 .hi { color: var(--amber); }
-.hero-sub {
-  font-size: 16px; color: var(--text2); font-weight: 300;
-  max-width: 520px; margin: 0 auto 48px; line-height: 1.8;
-}
-.hero-stats {
-  display: flex; gap: 0; justify-content: center;
-  border: 1px solid var(--border); border-radius: 12px;
-  overflow: hidden; max-width: 480px; margin: 0 auto;
-  background: var(--panel);
-}
-.hstat {
-  flex: 1; padding: 16px 20px; text-align: center;
-  border-right: 1px solid var(--border);
-}
-.hstat:last-child { border-right: none; }
-.hstat-n {
-  font-family: var(--mono); font-size: 22px; font-weight: 500;
-  color: var(--amber); line-height: 1;
-}
-.hstat-l { font-size: 11px; color: var(--text3); margin-top: 4px; letter-spacing: 0.5px; }
-
-/* ── MAIN LAYOUT ── */
-.main { max-width: 1200px; margin: 0 auto; padding: 0 32px 80px; }
-
-/* ── STEP INDICATOR ── */
-.steps {
-  display: flex; align-items: center; gap: 0;
-  margin-bottom: 32px;
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 12px; overflow: hidden; padding: 0;
-}
-.step {
-  flex: 1; display: flex; align-items: center; gap: 12px;
-  padding: 16px 20px; cursor: pointer;
-  border-right: 1px solid var(--border);
-  transition: background 0.2s; position: relative;
-}
-.step:last-child { border-right: none; }
-.step:hover { background: rgba(255,255,255,0.02); }
-.step.active { background: rgba(245,166,35,0.06); }
-.step.done { background: rgba(16,185,129,0.04); }
-.step-num {
-  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 12px; font-weight: 500;
-  border: 1.5px solid var(--border2); color: var(--text3);
-  transition: all 0.2s;
-}
-.step.active .step-num { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); box-shadow: 0 0 12px rgba(245,166,35,0.2); }
-.step.done .step-num { border-color: var(--green); background: var(--green-dim); color: var(--green); }
-.step-info { overflow: hidden; }
-.step-label { font-size: 12px; font-weight: 600; color: var(--text2); white-space: nowrap; }
-.step.active .step-label { color: var(--amber); }
-.step.done .step-label { color: var(--green); }
-.step-desc { font-size: 11px; color: var(--text3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* ── CARD ── */
-.card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 16px; overflow: hidden;
-}
-.card-header {
-  padding: 20px 24px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.card-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
-.card-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
-.card-body { padding: 24px; }
-
-/* ── FORM GRID ── */
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.form-grid.thirds { grid-template-columns: 1fr 1fr 1fr; }
-.field-full { grid-column: 1 / -1; }
-
-.field-label {
-  display: block; font-size: 10px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 8px;
-}
-.field-label span { color: var(--amber); }
-
-/* Inputs */
-.tg-input {
-  width: 100%; padding: 10px 14px;
-  background: var(--bg2); border: 1px solid var(--border2);
-  border-radius: 8px; color: var(--text);
-  font-family: var(--ff); font-size: 13.5px;
-  transition: border-color 0.15s, box-shadow 0.15s; outline: none;
-}
-.tg-input::placeholder { color: var(--text3); }
-.tg-input:focus {
-  border-color: var(--amber);
-  box-shadow: 0 0 0 3px rgba(245,166,35,0.1);
-}
-.tg-input:disabled { opacity: 0.35; cursor: not-allowed; }
-select.tg-input {
+button {
+  padding: 12px 18px;
+  background: orange;
+  border: none;
+  color: white;
   cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234A5568' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px;
-  appearance: none;
-}
-select.tg-input option { background: var(--bg2); }
-
-/* Multiselect */
-.multi-wrap { position: relative; }
-.chip-box {
-  min-height: 42px; padding: 5px 8px;
-  background: var(--bg2); border: 1px solid var(--border2);
-  border-radius: 8px; display: flex; flex-wrap: wrap; gap: 5px;
-  cursor: pointer; transition: border-color 0.15s;
-}
-.chip-box:hover { border-color: rgba(255,255,255,0.2); }
-.chip-box.focused { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,166,35,0.1); }
-.chip-ph { font-size: 13.5px; color: var(--text3); padding: 3px 5px; align-self: center; }
-.chip {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 3px 10px; border-radius: 5px; font-size: 12px; font-weight: 500;
-  background: rgba(245,166,35,0.15); color: var(--amber);
-  border: 1px solid rgba(245,166,35,0.25); cursor: pointer;
-  transition: background 0.1s;
-}
-.chip:hover { background: rgba(245,166,35,0.25); }
-.chip-x { font-size: 10px; opacity: 0.7; }
-.dropdown-menu {
-  display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 300;
-  background: var(--bg3); border: 1px solid var(--border2);
-  border-radius: 10px; max-height: 220px; overflow-y: auto;
-  padding: 5px; box-shadow: 0 16px 48px rgba(0,0,0,0.5);
-}
-.dropdown-menu.open { display: block; }
-.dopt {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 11px; border-radius: 7px; font-size: 13px;
-  color: var(--text2); cursor: pointer; transition: background 0.1s;
-}
-.dopt:hover { background: rgba(255,255,255,0.04); color: var(--text); }
-.dopt.sel { background: rgba(245,166,35,0.08); color: var(--amber); }
-.dopt-check {
-  width: 15px; height: 15px; border-radius: 4px; flex-shrink: 0;
-  border: 1.5px solid var(--border2); font-size: 9px;
-  display: flex; align-items: center; justify-content: center; color: var(--amber);
-}
-.dopt.sel .dopt-check { background: var(--amber-dim); border-color: var(--amber); }
-
-/* Segment control */
-.seg { display: flex; gap: 6px; flex-wrap: wrap; }
-.seg-btn {
-  padding: 8px 16px; border-radius: 7px; font-size: 12.5px; font-weight: 500;
-  border: 1px solid var(--border2); background: var(--bg2);
-  color: var(--text2); cursor: pointer; transition: all 0.15s;
-  display: flex; align-items: center; gap: 6px; white-space: nowrap;
-}
-.seg-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
-.seg-btn.active-easy   { background: rgba(16,185,129,0.1);  border-color: rgba(16,185,129,0.4);  color: #10B981; }
-.seg-btn.active-moderate { background: rgba(245,166,35,0.1); border-color: rgba(245,166,35,0.4); color: var(--amber); }
-.seg-btn.active-hard   { background: rgba(239,68,68,0.1);   border-color: rgba(239,68,68,0.4);   color: #EF4444; }
-.seg-btn.active-mixed  { background: rgba(59,130,246,0.1);  border-color: rgba(59,130,246,0.4);  color: #60A5FA; }
-.seg-btn.active-ai_only { background: rgba(245,166,35,0.1); border-color: rgba(245,166,35,0.4); color: var(--amber); }
-.seg-btn.soon { opacity: 0.45; position: relative; }
-.soon-tag {
-  font-family: var(--mono); font-size: 8px; letter-spacing: 1px;
-  background: rgba(245,166,35,0.2); color: var(--amber);
-  padding: 1px 5px; border-radius: 3px; margin-left: 2px;
-}
-
-/* Time hint */
-.time-hint {
-  margin-top: 7px; font-family: var(--mono); font-size: 11px;
-  color: var(--amber); display: flex; align-items: center; gap: 5px; opacity: 0.8;
-}
-.time-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--amber); }
-
-/* Divider */
-.divider { height: 1px; background: var(--border); margin: 8px 0 16px; }
-
-/* Generate button */
-.btn-gen {
-  width: 100%; padding: 14px 20px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--amber), #E8820A);
-  border: none; font-family: var(--ff); font-size: 15px; font-weight: 700;
-  color: #fff; cursor: pointer; letter-spacing: -0.3px;
-  display: flex; align-items: center; justify-content: center; gap: 9px;
-  transition: all 0.2s; box-shadow: 0 4px 20px rgba(245,166,35,0.25);
-  position: relative; overflow: hidden;
-}
-.btn-gen::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
-  opacity: 0; transition: opacity 0.2s;
-}
-.btn-gen:hover::before { opacity: 1; }
-.btn-gen:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(245,166,35,0.35); }
-.btn-gen:active { transform: translateY(0); }
-.btn-gen:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
-
-/* Secondary btn */
-.btn-sec {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 9px 18px; border-radius: 8px;
-  border: 1px solid var(--border2); background: var(--bg2);
-  font-family: var(--ff); font-size: 13px; font-weight: 500;
-  color: var(--text2); cursor: pointer; text-decoration: none;
-  transition: all 0.15s;
-}
-.btn-sec:hover { border-color: rgba(255,255,255,0.25); color: var(--text); background: rgba(255,255,255,0.04); }
-.btn-sec.green { border-color: rgba(16,185,129,0.3); color: var(--green); background: var(--green-dim); }
-.btn-sec.green:hover { background: rgba(16,185,129,0.15); }
-.btn-sec.amber { border-color: rgba(245,166,35,0.3); color: var(--amber); background: var(--amber-dim); }
-.btn-sec.amber:hover { background: rgba(245,166,35,0.2); }
-
-/* Loading */
-.loader-wrap { text-align: center; padding: 12px 0 4px; }
-.loader-bar {
-  height: 2px; background: var(--border); border-radius: 2px;
-  overflow: hidden; margin-bottom: 10px;
-}
-.loader-fill {
-  height: 100%;
-  background: linear-gradient(90deg, transparent, var(--amber), transparent);
-  animation: scan 1.6s ease-in-out infinite;
-  width: 40%;
-}
-@keyframes scan {
-  0%   { margin-left: -40%; }
-  100% { margin-left: 140%; }
-}
-.loader-txt {
-  font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: 1px;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.blink { animation: blink 1s step-end infinite; }
-@keyframes blink { 50% { opacity: 0; } }
-
-/* Error */
-.err {
-  padding: 11px 16px; background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.2); border-radius: 8px;
-  font-size: 12.5px; color: #FCA5A5; margin-top: 12px;
-  display: flex; align-items: flex-start; gap: 9px;
-}
-
-/* ── RESULTS ── */
-.results-card { margin-top: 24px; }
-
-.res-header {
-  padding: 20px 24px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
-}
-.res-title {
-  font-size: 17px; font-weight: 700; letter-spacing: -0.5px;
-  display: flex; align-items: center; gap: 10px;
-}
-.res-ok {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
-  color: var(--green); background: var(--green-dim);
-  border: 1px solid rgba(16,185,129,0.25); padding: 3px 9px; border-radius: 4px;
-}
-.res-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-/* Meta chips */
-.meta-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 14px 24px; border-bottom: 1px solid var(--border); }
-.meta-chip {
-  font-family: var(--mono); font-size: 10.5px; color: var(--text3);
-  background: var(--bg2); border: 1px solid var(--border);
-  padding: 3px 10px; border-radius: 4px; letter-spacing: 0.5px;
-}
-.meta-chip.amber { color: var(--amber); background: var(--amber-dim); border-color: rgba(245,166,35,0.2); }
-
-/* Tabs */
-.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 24px; }
-.tab {
-  padding: 12px 18px; font-size: 13px; font-weight: 500;
-  color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent;
-  transition: all 0.15s; margin-bottom: -1px;
-}
-.tab:hover { color: var(--text2); }
-.tab.active { color: var(--amber); border-bottom-color: var(--amber); }
-
-/* Content */
-.tab-content {
-  padding: 28px; max-height: 560px; overflow-y: auto;
-  font-size: 14px; line-height: 1.9; color: var(--text2);
-}
-.tab-content::-webkit-scrollbar { width: 4px; }
-.tab-content::-webkit-scrollbar-track { background: transparent; }
-.tab-content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-/* Markdown overrides */
-.md-out strong { color: var(--text); font-weight: 600; }
-.md-out h1,.md-out h2,.md-out h3 {
-  font-family: var(--mono); font-size: 11px; font-weight: 500;
-  letter-spacing: 2px; text-transform: uppercase; color: var(--amber);
-  margin: 28px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
-}
-.md-out p { margin-bottom: 2px; }
-.md-out hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
-.md-out code { font-family: var(--mono); font-size: 0.85em; background: var(--bg2); color: var(--amber); padding: 1px 6px; border-radius: 4px; }
-
-/* Form panel */
-.form-panel {
-  margin-top: 16px; padding: 20px 24px;
-  border-top: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
-}
-.form-panel-info { display: flex; flex-direction: column; gap: 3px; }
-.form-panel-title { font-size: 14px; font-weight: 600; color: var(--text); }
-.form-panel-sub { font-size: 12px; color: var(--text3); }
-.form-link-box {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  padding: 10px 14px; background: var(--bg2); border: 1px solid rgba(16,185,129,0.2);
-  border-radius: 8px; margin-top: 8px;
-}
-.form-link-url {
-  font-family: var(--mono); font-size: 11px; color: var(--green);
-  word-break: break-all; flex: 1;
-}
-
-/* Scroll hint */
-.scroll-fade {
-  position: sticky; bottom: 0; height: 40px;
-  background: linear-gradient(transparent, var(--panel));
-  pointer-events: none; margin-top: -40px;
-}
-
-/* How section */
-.how { padding: 60px 32px; max-width: 1200px; margin: 0 auto; }
-.how-title {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 3px;
-  text-transform: uppercase; color: var(--amber); text-align: center; margin-bottom: 8px;
-}
-.how-h2 {
-  font-size: clamp(24px, 3vw, 36px); font-weight: 800; text-align: center;
-  letter-spacing: -1px; color: var(--text); margin-bottom: 40px;
-}
-.how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.how-card {
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 14px; padding: 24px; transition: border-color 0.2s, transform 0.2s;
-}
-.how-card:hover { border-color: rgba(245,166,35,0.2); transform: translateY(-3px); }
-.how-n { font-family: var(--mono); font-size: 11px; color: var(--amber); letter-spacing: 2px; margin-bottom: 14px; }
-.how-icon { font-size: 28px; margin-bottom: 10px; }
-.how-ct { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; letter-spacing: -0.3px; }
-.how-cp { font-size: 13px; color: var(--text3); line-height: 1.7; }
-
-/* Footer */
-.footer {
-  border-top: 1px solid var(--border); padding: 24px 32px;
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
-}
-.footer-l { font-size: 13px; color: var(--text3); }
-.footer-r { font-family: var(--mono); font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
-
-/* Animations */
-@keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
-.a1{animation:fadeUp 0.5s ease both 0.05s}
-.a2{animation:fadeUp 0.5s ease both 0.15s}
-.a3{animation:fadeUp 0.5s ease both 0.25s}
-.a4{animation:fadeUp 0.5s ease both 0.35s}
-
-/* Responsive */
-@media(max-width:768px){
-  .form-grid,.form-grid.thirds{grid-template-columns:1fr}
-  .field-full{grid-column:1}
-  .how-grid{grid-template-columns:1fr}
-  .hero{padding:100px 20px 40px}
-  .main{padding:0 20px 60px}
-  .nav{padding:0 20px}
-  .footer{padding:20px}
-  .how{padding:40px 20px}
 }
 </style>
 </head>
+
 <body>
 <div id="root"></div>
+
 <script type="text/babel">
-const {useState,useRef,useEffect,useCallback} = React;
 
-const W1 = 'https://testgenbud.app.n8n.cloud/webhook/test-request';
-const W2 = 'https://testgenbud.app.n8n.cloud/webhook/a79aa193-7da0-413f-a96b-524079c041e4';
+const W1 = "https://testgenbud.app.n8n.cloud/webhook/test-request";
+const W2 = "https://testgenbud.app.n8n.cloud/webhook/88784932-ca43-4740-9718-091d8beb1575";
 
-const SYLLABUS = {
-  "Class 6":{
-    "Science":{"Food":["Food Sources","Components of Food","Cleaning Food"],"Materials":["Sorting Materials","Separation of Substances","Changes Around Us"],"Living World":["Getting to Know Plants","Body Movements","Living Organisms & Surroundings"],"Moving Things":["Motion & Measurement","Light Shadows & Reflections","Electricity & Circuits"],"Natural Resources":["Water","Air Around Us","Garbage In Garbage Out"]},
-    "Mathematics":{"Number System":["Knowing Numbers","Whole Numbers","Playing with Numbers","Integers"],"Geometry":["Basic Geometrical Ideas","Understanding Elementary Shapes","Symmetry","Practical Geometry"],"Algebra":["Introduction to Algebra","Ratio & Proportion"],"Mensuration":["Perimeter & Area"],"Data Handling":["Data Handling"]},
-    "Social Science":{"History":["What Where How and When","From Hunting to Farming","In the Earliest Cities","What Books and Burials Tell Us","Kingdoms Kings and Early Republic","New Questions and Ideas","Ashoka the Emperor","Vital Villages and Thriving Towns"],"Geography":["The Earth in the Solar System","Globe Latitudes and Longitudes","Motions of the Earth","Maps","Major Domains of the Earth","Our Country India"],"Civics":["Understanding Diversity","Unity in Diversity","What is Government","Key Elements of Democratic Government","Panchayati Raj","Rural Administration","Urban Administration","Rural Livelihoods","Urban Livelihoods"]},
-    "English":{"Reading":["Comprehension Passages","Poetry Appreciation","Reading for Information"],"Writing":["Paragraph Writing","Letter Writing","Notice Writing","Diary Entry"],"Grammar":["Nouns","Pronouns","Verbs","Adjectives","Adverbs","Tenses","Prepositions","Conjunctions"],"Literature":["A Pact with the Sun - Prose","A Pact with the Sun - Poems"]},
-    "Hindi":{"गद्य":["वसंत भाग 1 - कहानी","वसंत भाग 1 - निबंध","दुर्वा भाग 1"],"व्याकरण":["संज्ञा","सर्वनाम","क्रिया","विशेषण","काल","वाक्य भेद","मुहावरे"],"रचना":["निबंध लेखन","पत्र लेखन","अनुच्छेद लेखन"]},
-    "Computer Science":{"Basics":["Introduction to Computers","Parts of Computer","Input Output Devices","Memory & Storage"],"Software":["Operating System","MS Word","MS Excel","MS PowerPoint"],"Internet":["Introduction to Internet","Email","Web Browsing","Digital Safety"]}
-  },
-  "Class 7":{
-    "Science":{"Nutrition":["Nutrition in Plants","Nutrition in Animals"],"Heat & Temperature":["Heat","Acids Bases & Salts"],"Physical & Chemical Changes":["Physical & Chemical Changes","Weather Climate & Adaptations"],"Winds & Water":["Winds Storms & Cyclones","Water"],"Living World":["Transportation in Animals & Plants","Reproduction in Plants","Motion & Time","Electric Current"],"Light":["Light","Forests Our Lifeline","Wastewater Story"]},
-    "Mathematics":{"Number System":["Integers","Fractions & Decimals","Rational Numbers"],"Algebra":["Simple Equations","Exponents & Powers"],"Geometry":["Lines & Angles","Triangles","Congruence of Triangles","Symmetry","Visualising Solid Shapes"],"Ratio & Proportion":["Ratio & Proportion","Percentage","Profit & Loss","Simple Interest"],"Data Handling":["Data Handling","Probability"]},
-    "Social Science":{"History":["Tracing Changes Through 1000 Years","New Kings and Kingdoms","Delhi Sultans","The Mughal Empire","Rulers and Buildings","Towns Traders and Craftspersons","Tribes Nomads and Settled Communities","Devotional Paths to the Divine","The Making of Regional Cultures","18th Century Political Formations"],"Geography":["Environment","Inside Our Earth","Our Changing Earth","Air","Water","Natural Vegetation and Wildlife","Human Environment"],"Civics":["On Equality","Role of the Government in Health","How the State Government Works","Growing up as Boys and Girls","Women Change the World","Understanding Media","Understanding Advertising","Markets Around Us","A Shirt in the Market"]},
-    "English":{"Reading":["Comprehension","Poetry","Reading Skills"],"Writing":["Essay Writing","Letter Writing","Story Writing","Report Writing"],"Grammar":["Parts of Speech","Tenses","Voice","Narration","Clauses","Punctuation"],"Literature":["Honeycomb Prose","Honeycomb Poems","An Alien Hand Supplementary"]},
-    "Hindi":{"गद्य":["वसंत भाग 2","दुर्वा भाग 2","बाल महाभारत"],"व्याकरण":["शब्द विचार","संधि","समास","अलंकार","रस","छंद"],"रचना":["निबंध","पत्र","संवाद लेखन","सारांश"]},
-    "Computer Science":{"Programming":["Introduction to Scratch","Basic Algorithms","Flowcharts"],"Applications":["Advanced MS Office","Spreadsheets","Presentations"],"Internet":["Search Engines","Online Safety","Digital Footprint","Cyberbullying"]}
-  },
-  "Class 8":{
-    "Science":{"Crop Production":["Crop Production & Management","Microorganisms"],"Materials":["Synthetic Fibres & Plastics","Metals & Non-Metals","Coal & Petroleum","Combustion & Flame"],"Living World":["Conservation of Plants & Animals","Cell Structure & Functions","Reproduction in Animals"],"Force & Pressure":["Force & Pressure","Friction","Sound","Chemical Effects of Electric Current"],"Natural Phenomena":["Some Natural Phenomena","Light","Stars & Solar System","Pollution of Air & Water"]},
-    "Mathematics":{"Number System":["Rational Numbers","Squares & Square Roots","Cubes & Cube Roots","Exponents & Powers","Playing with Numbers"],"Algebra":["Algebraic Expressions","Linear Equations","Factorisation","Introduction to Graphs"],"Geometry":["Understanding Quadrilaterals","Practical Geometry","Visualising Solid Shapes","Mensuration"],"Data Handling":["Data Handling","Probability","Direct & Inverse Proportions","Comparing Quantities"]},
-    "Social Science":{"History":["How When and Where","From Trade to Territory","Ruling the Countryside","Tribals Dikus and the Vision of a Golden Age","When People Rebel","Weavers Iron Smelters and Factory Owners","Civilising the Native Educating the Nation","Women Caste and Reform","The Making of the National Movement","India After Independence"],"Geography":["Resources","Land Soil Water Natural Vegetation and Wildlife","Mineral and Power Resources","Agriculture","Industries","Human Resources"],"Civics":["The Indian Constitution","Understanding Secularism","Parliament and the Making of Laws","Judiciary","Understanding Marginalisation","Confronting Marginalisation","Public Facilities","Law and Social Justice"]},
-    "English":{"Reading":["Comprehension Passages","Poetry Analysis","Skimming & Scanning"],"Writing":["Formal Letters","Informal Letters","Article Writing","Speech Writing"],"Grammar":["Active Passive Voice","Direct Indirect Speech","Modals","Conditionals","Relative Clauses"],"Literature":["Honeydew Prose","Honeydew Poems","It So Happened Supplementary"]},
-    "Hindi":{"गद्य":["वसंत भाग 3","दुर्वा भाग 3","भारत की खोज"],"व्याकरण":["उपसर्ग प्रत्यय","समास","मुहावरे लोकोक्तियाँ","अलंकार","रस"],"रचना":["औपचारिक पत्र","अनौपचारिक पत्र","निबंध","विज्ञापन"]},
-    "Computer Science":{"Programming":["Introduction to Python","Variables & Data Types","Conditionals","Loops"],"Applications":["Database Concepts","HTML Basics","Cyber Security"],"Networking":["Types of Networks","Internet Protocols","Cloud Computing Basics"]}
-  },
-  "Class 9":{
-    "Science":{"Matter":["Matter in Our Surroundings","Is Matter Around Us Pure","Atoms & Molecules","Structure of Atom"],"Living World":["Cell The Fundamental Unit","Tissues","Diversity in Living Organisms","Why Do We Fall Ill"],"Motion & Force":["Motion","Force & Laws of Motion","Gravitation","Work & Energy","Sound"],"Natural Resources":["Natural Resources","Improvement in Food Resources"]},
-    "Mathematics":{"Number System":["Number Systems"],"Algebra":["Polynomials","Linear Equations in Two Variables"],"Geometry":["Introduction to Euclid's Geometry","Lines & Angles","Triangles","Quadrilaterals","Areas of Parallelograms","Circles","Constructions"],"Mensuration":["Heron's Formula","Surface Areas & Volumes"],"Statistics & Probability":["Statistics","Probability"],"Coordinate Geometry":["Coordinate Geometry"]},
-    "Social Science":{"History":["French Revolution","Socialism in Europe","Nazism & Rise of Hitler","Forest Society","Pastoralists","Peasants & Farmers","History & Sport","Clothing History"],"Geography":["India Size & Location","Physical Features","Drainage","Climate","Natural Vegetation","Population"],"Political Science":["What is Democracy","Constitutional Design","Electoral Politics","Working of Institutions","Democratic Rights"],"Economics":["Story of Palampur","People as Resource","Poverty as Challenge","Food Security"]},
-    "English":{"Reading":["Unseen Passages","Note Making","Summary Writing"],"Writing":["Formal Letters","Article Writing","Story Writing","Diary Entry","Report Writing"],"Grammar":["Tenses","Modals","Subject Verb Agreement","Determiners","Reported Speech","Clauses"],"Literature":["Beehive Prose","Beehive Poems","Moments Supplementary"]},
-    "Hindi":{"गद्य":["क्षितिज भाग 1","कृतिका भाग 1"],"व्याकरण":["अपठित गद्यांश","शब्द विचार","वाक्य भेद","अलंकार","समास","संधि"],"रचना":["निबंध","पत्र","संवाद","विज्ञापन","सूचना लेखन"]},
-    "Computer Science":{"Programming":["Python Fundamentals","Data Types & Variables","Control Structures","Functions","Lists & Tuples"],"Computer Systems":["CPU & Memory","Storage Devices","Operating Systems","Boolean Logic"],"Cyber Safety":["Cyber Crimes","Online Safety","Intellectual Property","Privacy"]}
-  },
-  "Class 10":{
-    "Science":{"Life Processes":["Nutrition","Respiration","Transportation","Excretion"],"Control & Coordination":["Nervous System","Hormones in Animals","Control in Plants"],"Reproduction":["Reproduction in Organisms","Human Reproductive System","Reproductive Health"],"Heredity & Evolution":["Heredity","Evolution","Speciation","Human Evolution"],"Chemical Reactions":["Chemical Reactions & Equations","Acids Bases & Salts","Metals & Non-Metals","Carbon Compounds","Periodic Classification"],"Natural Phenomena":["Light - Reflection","Light - Refraction","Human Eye","Electricity","Magnetic Effects of Current"],"Natural Resources":["Sources of Energy","Our Environment","Management of Natural Resources"]},
-    "Mathematics":{"Number System":["Real Numbers"],"Algebra":["Polynomials","Pair of Linear Equations","Quadratic Equations","Arithmetic Progressions"],"Geometry":["Triangles","Circles","Constructions"],"Trigonometry":["Introduction to Trigonometry","Applications of Trigonometry"],"Mensuration":["Areas Related to Circles","Surface Areas & Volumes"],"Statistics & Probability":["Statistics","Probability"],"Coordinate Geometry":["Coordinate Geometry"]},
-    "Social Science":{"History":["Nationalism in Europe","Nationalism in India","Age of Industrialisation","Print Culture","Novels Society & History"],"Geography":["Resources & Development","Forest & Wildlife","Water Resources","Agriculture","Minerals & Energy","Manufacturing Industries","Lifelines of National Economy"],"Political Science":["Power Sharing","Federalism","Gender Religion Caste","Political Parties","Outcomes of Democracy","Challenges to Democracy"],"Economics":["Development","Sectors of Indian Economy","Money & Credit","Globalisation","Consumer Rights"]},
-    "English":{"Reading":["Unseen Passage Factual","Unseen Passage Discursive","Note Making & Summary"],"Writing":["Formal Letter","Article Writing","Speech Writing","Debate Writing","Report Writing","Story Writing"],"Grammar":["Gap Filling","Editing & Omission","Sentence Reordering","Sentence Transformation"],"Literature":["First Flight Prose","First Flight Poems","Footprints Without Feet Supplementary"]},
-    "Hindi":{"गद्य":["क्षितिज भाग 2","कृतिका भाग 2"],"व्याकरण":["अपठित गद्यांश","अपठित काव्यांश","व्याकरण बोध"],"रचना":["निबंध लेखन","पत्र लेखन","सूचना लेखन","विज्ञापन लेखन"]},
-    "Computer Science":{"Programming":["Python Revision","Working with Functions","File Handling","Exception Handling"],"Database":["Introduction to MySQL","SQL Commands DDL DML","Queries","Joins"],"Networking":["Network Concepts","Network Devices","Network Topologies","Internet Services"]}
-  },
-  "Class 11":{
-    "Physics":{"Mechanics":["Physical World","Units & Measurements","Motion in Straight Line","Motion in Plane","Laws of Motion","Work Energy Power","System of Particles","Gravitation"],"Properties of Matter":["Mechanical Properties of Solids","Mechanical Properties of Fluids","Thermal Properties","Thermodynamics","Kinetic Theory"],"Waves":["Oscillations","Waves"]},
-    "Chemistry":{"Physical Chemistry":["Some Basic Concepts","Structure of Atom","Classification of Elements","Chemical Bonding","States of Matter","Thermodynamics","Equilibrium","Redox Reactions"],"Inorganic Chemistry":["Hydrogen","s-Block Elements","p-Block Elements"],"Organic Chemistry":["Organic Chemistry Basic","Hydrocarbons","Environmental Chemistry"]},
-    "Biology":{"Diversity":["Living World","Biological Classification","Plant Kingdom","Animal Kingdom"],"Structural Organisation":["Morphology of Plants","Anatomy of Plants","Structural Organisation in Animals"],"Cell Biology":["Cell The Unit of Life","Biomolecules","Cell Cycle & Division"],"Plant Physiology":["Transport in Plants","Mineral Nutrition","Photosynthesis","Respiration in Plants","Plant Growth"],"Human Physiology":["Digestion & Absorption","Breathing & Exchange","Body Fluids & Circulation","Excretory Products","Locomotion & Movement","Neural Control","Chemical Coordination"]},
-    "Mathematics":{"Sets & Functions":["Sets","Relations & Functions","Trigonometric Functions"],"Algebra":["Complex Numbers","Linear Inequalities","Permutations & Combinations","Binomial Theorem","Sequences & Series"],"Coordinate Geometry":["Straight Lines","Conic Sections","Introduction to 3D Geometry"],"Calculus":["Limits & Derivatives"],"Statistics & Probability":["Statistics","Probability"]},
-    "English":{"Reading":["Unseen Passages","Note Making","Summary"],"Writing":["Notice","Advertisement","Business Letter","Report","Article","Speech","Debate"],"Grammar":["Advanced Grammar","Sentence Transformation","Error Correction"],"Literature":["Hornbill Prose","Hornbill Poems","Snapshots Supplementary"]},
-    "Hindi":{"गद्य":["आरोह भाग 1","वितान भाग 1"],"व्याकरण":["अपठित बोध","कार्यालयी हिंदी","काव्यबोध"],"रचना":["निबंध","पत्र","प्रतिवेदन","विज्ञापन"]},
-    "Computer Science":{"Programming":["Python Basics","pandas","Matplotlib","File Handling"],"Database":["MySQL Basics","SQL Queries","Python-MySQL Connectivity"],"Networking":["Network Concepts","Security Concepts","Open Source Software"]}
-  },
-  "Class 12":{
-    "Physics":{"Electromagnetism":["Electric Charges & Fields","Electrostatic Potential","Current Electricity","Moving Charges","Magnetism","Electromagnetic Induction","AC Circuits","EM Waves"],"Optics":["Ray Optics","Wave Optics"],"Modern Physics":["Dual Nature","Atoms","Nuclei","Semiconductors","Communication Systems"]},
-    "Chemistry":{"Physical Chemistry":["Solid State","Solutions","Electrochemistry","Chemical Kinetics","Surface Chemistry"],"Inorganic Chemistry":["General Principles","p-Block Elements","d & f Block","Coordination Compounds"],"Organic Chemistry":["Haloalkanes & Haloarenes","Alcohols Phenols Ethers","Aldehydes Ketones Acids","Amines","Biomolecules","Polymers","Chemistry in Everyday Life"]},
-    "Biology":{"Reproduction":["Reproduction in Organisms","Sexual Reproduction in Plants","Human Reproduction","Reproductive Health"],"Genetics & Evolution":["Inheritance & Variation","Molecular Basis of Inheritance","Evolution"],"Biology in Human Welfare":["Human Health & Disease","Strategies for Food Production","Microbes in Human Welfare"],"Biotechnology":["Biotechnology Principles","Biotechnology Applications"],"Ecology":["Organisms & Populations","Ecosystem","Biodiversity","Environmental Issues"]},
-    "Mathematics":{"Relations & Functions":["Relations & Functions","Inverse Trigonometric Functions"],"Algebra":["Matrices","Determinants"],"Calculus":["Continuity & Differentiability","Applications of Derivatives","Integrals","Applications of Integrals","Differential Equations"],"Vectors & 3D":["Vector Algebra","Three Dimensional Geometry"],"Linear Programming":["Linear Programming"],"Probability":["Probability"]},
-    "English":{"Reading":["Unseen Passages","Note Making & Summary"],"Writing":["Notice","Advertisement","Business Letter","Report","Article","Speech"],"Grammar":["Error Correction","Gap Filling","Sentence Transformation"],"Literature":["Flamingo Prose","Flamingo Poems","Vistas Supplementary"]},
-    "Hindi":{"गद्य":["आरोह भाग 2","वितान भाग 2"],"व्याकरण":["अपठित बोध","कार्यालयी हिंदी","व्याकरण"],"रचना":["निबंध","पत्र","प्रतिवेदन"]},
-    "Computer Science":{"Programming":["Python Advanced","Pandas Advanced","Data Visualization","File Handling Advanced"],"Database":["MySQL Advanced","Views & Stored Procedures","Python-MySQL Advanced"],"Networking":["Internet Basics","Network Security","Open Source Concepts","Societal Impact"]}
-  },
-  "JEE Mains":{"Physics":{"Mechanics":["Kinematics","Laws of Motion","Work Energy Power","Rotational Motion","Gravitation","Properties of Matter"],"Thermodynamics":["Thermal Properties","Laws of Thermodynamics","Kinetic Theory of Gases","Heat Transfer"],"Waves & Optics":["Oscillations","Waves","Ray Optics","Wave Optics"],"Electromagnetism":["Electrostatics","Current Electricity","Magnetic Effects","Electromagnetic Induction","AC Circuits","EM Waves"],"Modern Physics":["Dual Nature of Radiation","Atoms & Nuclei","Semiconductors","Communication Systems"]},"Chemistry":{"Physical Chemistry":["Mole Concept","Atomic Structure","Chemical Bonding","States of Matter","Thermodynamics","Equilibrium","Electrochemistry","Chemical Kinetics","Surface Chemistry"],"Inorganic Chemistry":["Periodic Table","s-Block Elements","p-Block Elements","d & f Block Elements","Coordination Compounds","Metallurgy","Environmental Chemistry"],"Organic Chemistry":["Basic Concepts","Hydrocarbons","Haloalkanes","Alcohols & Ethers","Aldehydes & Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"]},"Mathematics":{"Algebra":["Sets & Relations","Complex Numbers","Sequences & Series","Permutations & Combinations","Binomial Theorem","Matrices & Determinants","Probability"],"Calculus":["Limits & Continuity","Differentiation","Applications of Derivatives","Integration","Definite Integrals","Differential Equations"],"Coordinate Geometry":["Straight Lines","Circles","Parabola","Ellipse","Hyperbola","3D Geometry"],"Trigonometry":["Trigonometric Functions","Inverse Trigonometry","Properties of Triangles"]}},
-  "NEET":{"Physics":{"Mechanics":["Kinematics","Laws of Motion","Work Energy Power","Rotational Motion","Gravitation"],"Thermodynamics":["Thermal Properties","Laws of Thermodynamics","Kinetic Theory"],"Waves & Optics":["Oscillations","Waves","Ray Optics","Wave Optics"],"Electromagnetism":["Electrostatics","Current Electricity","Magnetic Effects","EM Induction"],"Modern Physics":["Dual Nature","Atoms & Nuclei","Semiconductors"]},"Chemistry":{"Physical Chemistry":["Mole Concept","Atomic Structure","Chemical Bonding","Thermodynamics","Equilibrium","Electrochemistry","Chemical Kinetics"],"Inorganic Chemistry":["Periodic Table","s-Block","p-Block","d-Block","Coordination Compounds","Metallurgy"],"Organic Chemistry":["Basic Concepts","Hydrocarbons","Haloalkanes","Alcohols","Aldehydes & Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"]},"Biology":{"Botany":["Cell Biology","Plant Morphology","Plant Physiology","Reproduction in Plants","Genetics","Evolution","Ecology"],"Zoology":["Animal Kingdom","Human Physiology","Animal Reproduction","Human Reproduction","Genetics & Evolution","Biology in Human Welfare","Biotechnology","Ecology"]}}
-};
-
-function toTitle(s){return s.trim().replace(/\w\S*/g,t=>t.charAt(0).toUpperCase()+t.substr(1).toLowerCase());}
-function calcTime(n,d){return Math.ceil(n*2*(d==='Easy'?0.8:d==='Hard'?1.2:1.0));}
-
-function parseTest(raw){
-  let c=raw.replace(/^=\s*/,'').trim();
-  // Normalize options that have leading spaces: " A)" → "A)"
-  c=c.replace(/\n\s+([A-D][.)]\s)/g,'\n$1');
-  c=c.replace(/^[\s\S]*?(?=(?:\*{0,2}QUESTIONS?\*{0,2}:?\s*\n|^\s*1[.)]\s))/im,'').trim();
-  if(!c.match(/^(\*{0,2}QUESTIONS?|1[.)]\s)/i)){const f=c.indexOf('\n\n');if(f>0)c=c.slice(f).trim();}
-  c=c.replace(/^\*{0,2}QUESTIONS?:?\*{0,2}\s*\n/im,'').trim();
-  const cl=c.toLowerCase(),ak=cl.search(/answer\s*key/);
-  return{cleaned:c,questions:ak>0?c.slice(0,ak).trim():c,answerKey:ak>0?c.slice(ak).trim():''};
-}
-
-// ── MULTI SELECT ──────────────────────────────────────────────
-function MultiSelect({options,selected,onChange,placeholder,disabled}){
-  const [open,setOpen]=useState(false);
-  const ref=useRef(null);
-  useEffect(()=>{
-    const h=e=>{if(ref.current&&!ref.current.contains(e.target))setOpen(false);};
-    document.addEventListener('mousedown',h);
-    return()=>document.removeEventListener('mousedown',h);
-  },[]);
-  const toggle=o=>onChange(selected.includes(o)?selected.filter(s=>s!==o):[...selected,o]);
-  return(
-    <div className="multi-wrap" ref={ref} style={{opacity:disabled?0.35:1,pointerEvents:disabled?'none':'auto'}}>
-      <div className={`chip-box${open?' focused':''}`} onClick={()=>setOpen(!open)}>
-        {selected.length===0
-          ?<span className="chip-ph">{placeholder}</span>
-          :selected.map(s=>(
-            <span key={s} className="chip" onClick={e=>{e.stopPropagation();toggle(s);}}>
-              {s}<span className="chip-x">✕</span>
-            </span>
-          ))
-        }
-      </div>
-      <div className={`dropdown-menu${open?' open':''}`}>
-        {options.map(o=>(
-          <div key={o} className={`dopt${selected.includes(o)?' sel':''}`} onClick={()=>toggle(o)}>
-            <div className="dopt-check">{selected.includes(o)?'✓':''}</div>{o}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── MAIN APP ──────────────────────────────────────────────────
 function App(){
-  const [step,setStep]=useState(1); // 1=form 2=results
-  const [examType,setExamType]=useState('');
-  const [subject,setSubject]=useState('');
-  const [chapters,setChapters]=useState([]);
-  const [topics,setTopics]=useState([]);
-  const [difficulty,setDifficulty]=useState('');
-  const [numQ,setNumQ]=useState('');
-  const [mode,setMode]=useState('ai_only');
-  const [timeLimit,setTimeLimit]=useState('');
-  const [email,setEmail]=useState('');
-  const [loading,setLoading]=useState(false);
-  const [error,setError]=useState('');
-  const [result,setResult]=useState(null);
-  const [meta,setMeta]=useState(null);
-  const [activeTab,setActiveTab]=useState('questions');
-  const [formLoading,setFormLoading]=useState(false);
-  const [formData,setFormData]=useState(null);
-  const [formError,setFormError]=useState('');
-  const resultRef=useRef(null);
 
-  const subjects=examType?Object.keys(SYLLABUS[examType]||{}):[];
-  const chapterOpts=(examType&&subject)?Object.keys(SYLLABUS[examType]?.[subject]||{}):[];
-  const topicOpts=chapters.flatMap(ch=>SYLLABUS[examType]?.[subject]?.[ch]||[]);
-  const suggestedTime=(numQ&&difficulty&&difficulty!=='Mixed')?calcTime(parseInt(numQ),difficulty):null;
+  const [loading,setLoading] = React.useState(false);
+  const [formLoading,setFormLoading] = React.useState(false);
+  const [result,setResult] = React.useState(null);
+  const [meta,setMeta] = React.useState(null);
+  const [formData,setFormData] = React.useState(null);
+  const [error,setError] = React.useState("");
+  const [formError,setFormError] = React.useState("");
 
-  useEffect(()=>{if(suggestedTime)setTimeLimit(String(suggestedTime));},[numQ,difficulty]);
-  useEffect(()=>{setSubject('');setChapters([]);setTopics([]);},[examType]);
-  useEffect(()=>{setChapters([]);setTopics([]);},[subject]);
-  useEffect(()=>{setTopics([]);},[chapters]);
-
+  // -------- GENERATE TEST --------
   async function generate(){
-    if(!examType||!subject||chapters.length===0||topics.length===0||!difficulty||!numQ){
-      setError('Please fill in all required fields.'); return;
+
+    setLoading(true);
+    setError("");
+    setFormData(null);
+
+    try{
+      const res = await fetch(W1,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          exam_type: "Class 10",
+          subject: "Science",
+          chapters: ["Life Processes"],
+          topics: ["Nutrition"],
+          difficulty: "Easy",
+          num_questions: 5
+        })
+      });
+
+      if(!res.ok) throw new Error("Generation failed");
+
+      const data = await res.json();
+
+      setResult(data.generated_text);
+      setMeta({
+        test_id: data.test_id
+      });
+
+    }catch(e){
+      setError(e.message);
     }
-    setError('');setLoading(true);setResult(null);setFormData(null);setFormError('');
-    const payload={exam_type:examType,subject:toTitle(subject),chapters,topics,difficulty,num_questions:parseInt(numQ),mode,time_limit:parseInt(timeLimit)||suggestedTime||20,teacher_email:email.trim().toLowerCase()};
-    try{
-      const res=await fetch(W1,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      if(!res.ok)throw new Error(`Server error ${res.status}`);
-      const raw=await res.text();
-      let text,testId;
-      try{const j=JSON.parse(raw);text=j.generated_text||j.output||j.result||raw;testId=j.test_id||null;}
-      catch{text=raw;testId=null;}
-      if(!text||!text.trim())throw new Error('Empty response. Please try again.');
-      const parsed=parseTest(text);
-      setResult(parsed);
-      setMeta({...payload,test_id:testId});
-      setStep(2);
-      setTimeout(()=>resultRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100);
-    }catch(e){setError('Generation failed: '+e.message);}
-    finally{setLoading(false);}
+
+    setLoading(false);
   }
 
+  // -------- CREATE GOOGLE FORM --------
   async function createForm(){
-    if(!result||!meta){return;}
-    setFormLoading(true);setFormError('');
-    const payload={generated_text:result.cleaned,exam_type:meta.exam_type,subject:meta.subject,topics:meta.topics.join?meta.topics.join(', '):meta.topics,difficulty:meta.difficulty,num_questions:meta.num_questions,time_limit:meta.time_limit,teacher_email:meta.teacher_email,test_id:meta.test_id||''};
-    try{
-      const res=await fetch(W2,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      if(!res.ok)throw new Error(`Server error ${res.status}`);
-      const data=await res.json();
-      setFormData(data);
-    }catch(e){setFormError('Form creation failed: '+e.message);}
-    finally{setFormLoading(false);}
-  }
 
-  const parsed=result?parseTest(result.cleaned||result.questions||''):null;
+    if(!meta?.test_id){
+      setFormError("Missing test_id");
+      return;
+    }
+
+    setFormLoading(true);
+    setFormError("");
+
+    try{
+
+      const res = await fetch(W2,{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json'
+        },
+        body: JSON.stringify({
+          test_id: meta.test_id   // ✅ FIXED
+        })
+      });
+
+      if(!res.ok){
+        throw new Error(`Server error ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      setFormData({
+        form_link: data.form_link,
+        total_questions: data.total_questions
+      });
+
+    }catch(e){
+      setFormError("Form creation failed: " + e.message);
+    }
+
+    setFormLoading(false);
+  }
 
   return(
-    <>
-    {/* NAV */}
-    <nav className="nav">
-      <div className="nav-logo">
-        <div className="nav-logo-mark">T</div>
-        TestGen<span style={{color:'var(--amber)'}}>AI</span>
-      </div>
-      <div className="nav-right">
-        <div className="nav-dot"/>
-        <span className="nav-status">Live</span>
-        <span className="nav-tag">CBSE · CLASS 6–12</span>
-      </div>
-    </nav>
+    <div>
 
-    {/* HERO */}
-    <div className="hero">
-      <div className="hero-eyebrow a1">⚡ AI-Powered Test Generation</div>
-      <h1 className="hero-h1 a2">
-        Generate <span className="hi">CBSE Tests</span><br/>in 30 Seconds
-      </h1>
-      <p className="hero-sub a3">
-        Syllabus-aligned question papers for Class 6–12, all subjects. Complete with answer keys and Google Form delivery.
-      </p>
-      <div className="hero-stats a4">
-        {[['30s','Generation'],['Class 6–12','All Classes'],['7+','Subjects']].map(([n,l])=>(
-          <div key={l} className="hstat">
-            <div className="hstat-n">{n}</div>
-            <div className="hstat-l">{l}</div>
-          </div>
-        ))}
-      </div>
-    </div>
+      <h1>TestGen AI</h1>
 
-    {/* MAIN */}
-    <div className="main">
+      <button onClick={generate}>
+        {loading ? "Generating..." : "Generate Test"}
+      </button>
 
-      {/* STEP INDICATOR */}
-      <div className="steps a4">
-        {[
-          {n:1,label:'Configure',desc:'Class, subject & topics'},
-          {n:2,label:'Generate',desc:'AI creates questions'},
-          {n:3,label:'Deliver',desc:'Google Form for students'}
-        ].map(s=>(
-          <div key={s.n} className={`step ${step===s.n?'active':step>s.n?'done':''}`} onClick={()=>s.n<=step&&setStep(s.n)}>
-            <div className="step-num">{step>s.n?'✓':s.n}</div>
-            <div className="step-info">
-              <div className="step-label">{s.label}</div>
-              <div className="step-desc">{s.desc}</div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {error && <p style={{color:"red"}}>{error}</p>}
 
-      {/* FORM CARD */}
-      <div className="card a4">
-        <div className="card-header">
-          <div>
-            <div className="card-title">Test Configuration</div>
-            <div className="card-sub">Configure your test parameters below</div>
-          </div>
-          {meta&&<span className="res-ok">✓ Test Ready</span>}
-        </div>
-        <div className="card-body">
-          <div className="form-grid">
-            {/* Class */}
-            <div>
-              <label className="field-label">Class / Exam <span>*</span></label>
-              <select className="tg-input" value={examType} onChange={e=>setExamType(e.target.value)}>
-                <option value="">Select class or exam</option>
-                <optgroup label="CBSE School">
-                  {['Class 6','Class 7','Class 8','Class 9','Class 10','Class 11','Class 12'].map(c=><option key={c}>{c}</option>)}
-                </optgroup>
-                <optgroup label="Competitive Exams">
-                  <option>JEE Mains</option><option>NEET</option>
-                </optgroup>
-              </select>
-            </div>
-            {/* Subject */}
-            <div>
-              <label className="field-label">Subject <span>*</span></label>
-              <select className="tg-input" value={subject} onChange={e=>setSubject(e.target.value)} disabled={!examType}>
-                <option value="">Select subject</option>
-                {subjects.map(s=><option key={s}>{s}</option>)}
-              </select>
-            </div>
-            {/* Chapters */}
-            <div className="field-full">
-              <label className="field-label">Chapters <span>*</span></label>
-              <MultiSelect options={chapterOpts} selected={chapters} onChange={setChapters} placeholder="Select one or more chapters…" disabled={!subject}/>
-            </div>
-            {/* Topics */}
-            <div className="field-full">
-              <label className="field-label">Topics <span>*</span></label>
-              <MultiSelect options={topicOpts} selected={topics} onChange={setTopics} placeholder="Select topics to include…" disabled={chapters.length===0}/>
-            </div>
-          </div>
+      {result && (
+        <>
+          <pre style={{marginTop:"20px"}}>{result}</pre>
 
-          <div className="divider"/>
-
-          <div className="form-grid thirds">
-            {/* Difficulty */}
-            <div className="field-full">
-              <label className="field-label">Difficulty <span>*</span></label>
-              <div className="seg">
-                {[['Easy','🟢'],['Moderate','🟡'],['Hard','🔴'],['Mixed','🎲']].map(([d,icon])=>(
-                  <button key={d} className={`seg-btn ${difficulty===d?`active-${d.toLowerCase()}`:''}`} onClick={()=>setDifficulty(d)}>
-                    {icon} {d}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* Questions */}
-            <div>
-              <label className="field-label">No. of Questions <span>*</span></label>
-              <input className="tg-input" type="number" placeholder="e.g. 10" min="1" max="30" value={numQ} onChange={e=>setNumQ(e.target.value)}/>
-            </div>
-            {/* Time */}
-            <div>
-              <label className="field-label">Time Limit (min)</label>
-              <input className="tg-input" type="number" placeholder="Auto" value={timeLimit} onChange={e=>setTimeLimit(e.target.value)}/>
-              {suggestedTime&&<div className="time-hint"><span className="time-dot"/>{suggestedTime} min recommended</div>}
-            </div>
-          </div>
-
-          <div className="divider"/>
-
-          {/* Mode */}
-          <div style={{marginBottom:'20px'}}>
-            <label className="field-label">Generation Mode</label>
-            <div className="seg">
-              <button className={`seg-btn ${mode==='ai_only'?'active-ai_only':''}`} onClick={()=>setMode('ai_only')}>🤖 AI Generated</button>
-              <button className="seg-btn soon" onClick={()=>setMode('mixed')}>⚡ Mixed (50/50) <span className="soon-tag">SOON</span></button>
-              <button className="seg-btn soon" onClick={()=>setMode('pyq')}>📚 PYQ Only <span className="soon-tag">SOON</span></button>
-            </div>
-          </div>
-
-          {/* Email */}
-          <div style={{marginBottom:'24px'}}>
-            <label className="field-label">Teacher Email</label>
-            <input className="tg-input" type="email" placeholder="teacher@school.com" value={email} onChange={e=>setEmail(e.target.value)} style={{maxWidth:'360px'}}/>
-          </div>
-
-          {/* Submit */}
-          <button className="btn-gen" onClick={generate} disabled={loading}>
-            {loading
-              ?<>⏳ Generating questions…</>
-              :<>⚡ Generate Test Paper →</>
-            }
+          <button onClick={createForm} style={{marginTop:"20px"}}>
+            {formLoading ? "Creating Form..." : "Create Google Form"}
           </button>
+        </>
+      )}
 
-          {/* Loader */}
-          {loading&&(
-            <div className="loader-wrap">
-              <div className="loader-bar"><div className="loader-fill"/></div>
-              <div className="loader-txt">
-                <span className="blink">▋</span>
-                AI IS WRITING YOUR QUESTIONS
-              </div>
-            </div>
-          )}
-
-          {/* Error */}
-          {error&&(
-            <div className="err">
-              <span>⚠</span><span>{error}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* RESULTS */}
-      {result&&(
-        <div className="card results-card" ref={resultRef}>
-          {/* Header */}
-          <div className="res-header">
-            <div className="res-title">
-              Test Paper Generated
-              <span className="res-ok">✓ SUCCESS</span>
-            </div>
-            <div className="res-actions">
-              <button className="btn-sec" onClick={()=>{
-                const blob=new Blob([result.cleaned],{type:'text/plain'});
-                const a=document.createElement('a');
-                a.href=URL.createObjectURL(blob);
-                a.download=`${meta?.exam_type}_${meta?.subject}_test.txt`;
-                a.click();
-              }}>⬇ Download</button>
-              <button className="btn-sec" onClick={()=>navigator.clipboard?.writeText(result.cleaned)}>⎘ Copy</button>
-              <button className="btn-sec amber" onClick={()=>setResult(null)&&setStep(1)}>↺ Regenerate</button>
-            </div>
-          </div>
-
-          {/* Meta chips */}
-          <div className="meta-row">
-            {meta&&[
-              meta.exam_type,
-              meta.subject,
-              meta.difficulty,
-              `${meta.num_questions} Questions`,
-              `${meta.time_limit} min`,
-              meta.mode==='ai_only'?'AI Generated':'Mixed'
-            ].map(v=><span key={v} className={`meta-chip ${v===meta.difficulty?'amber':''}`}>{v}</span>)}
-            {meta?.test_id&&<span className="meta-chip" style={{fontFamily:'var(--mono)',fontSize:'10px'}}>ID: {meta.test_id}</span>}
-          </div>
-
-          {/* Tabs */}
-          <div className="tabs">
-            {[['questions','Questions'],['answerkey','Answer Key'],['full','Full Paper']].map(([id,label])=>(
-              <div key={id} className={`tab ${activeTab===id?'active':''}`} onClick={()=>setActiveTab(id)}>
-                {label}
-              </div>
-            ))}
-          </div>
-
-          {/* Tab content */}
-          <div className="tab-content">
-            {activeTab==='questions'&&(
-              <div className="md-out" dangerouslySetInnerHTML={{__html:marked.parse(result.questions||result.cleaned||'')}}/>
-            )}
-            {activeTab==='answerkey'&&(
-              <div className="md-out" dangerouslySetInnerHTML={{__html:marked.parse(result.answerKey||'*Answer key not found in output.*')}}/>
-            )}
-            {activeTab==='full'&&(
-              <div className="md-out" dangerouslySetInnerHTML={{__html:marked.parse(result.cleaned||'')}}/>
-            )}
-          </div>
-          <div className="scroll-fade"/>
-
-          {/* Google Form panel */}
-          <div className="form-panel">
-            <div className="form-panel-info">
-              <div className="form-panel-title">📋 Create Google Form Quiz</div>
-              <div className="form-panel-sub">Auto-generate a timed Google Form and share with students</div>
-            </div>
-            <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
-              {!formData&&(
-                <button className="btn-sec green" onClick={createForm} disabled={formLoading}>
-                  {formLoading?'⏳ Creating…':'✦ Create Google Form'}
-                </button>
-              )}
-              {formData?.form_link&&(
-                <>
-                  <a className="btn-sec green" href={formData.form_link} target="_blank">🔗 Open Form</a>
-                  <button className="btn-sec" onClick={()=>navigator.clipboard?.writeText(formData.form_link)}>⎘ Copy Link</button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Form result */}
-          {formData?.form_link&&(
-            <div style={{padding:'0 24px 20px'}}>
-              <div className="form-link-box">
-                <span className="form-link-url">{formData.form_link}</span>
-                <span style={{fontFamily:'var(--mono)',fontSize:'10px',color:'var(--green)',whiteSpace:'nowrap'}}>
-                  {formData.total_questions} questions
-                </span>
-              </div>
-            </div>
-          )}
-          {formError&&(
-            <div style={{padding:'0 24px 16px'}}>
-              <div className="err"><span>⚠</span><span>{formError}</span></div>
-            </div>
-          )}
+      {formData && (
+        <div style={{marginTop:"20px"}}>
+          <a href={formData.form_link} target="_blank">
+            Open Google Form
+          </a>
+          <p>{formData.total_questions} questions</p>
         </div>
       )}
-    </div>
 
-    {/* HOW IT WORKS */}
-    <div className="how">
-      <div className="how-title">HOW IT WORKS</div>
-      <h2 className="how-h2">Three steps to a complete test</h2>
-      <div className="how-grid">
-        {[
-          {n:'01',icon:'🎯',title:'Configure',desc:'Select class, subject, chapters and topics. Set difficulty level and number of questions.'},
-          {n:'02',icon:'⚡',title:'Generate',desc:'AI creates syllabus-aligned MCQ questions with answer key and explanations in 30 seconds.'},
-          {n:'03',icon:'📋',title:'Deliver',desc:'One click creates a timed Google Form quiz. Share the link with students and track responses.'}
-        ].map(c=>(
-          <div key={c.n} className="how-card">
-            <div className="how-n">{c.n}</div>
-            <div className="how-icon">{c.icon}</div>
-            <div className="how-ct">{c.title}</div>
-            <div className="how-cp">{c.desc}</div>
-          </div>
-        ))}
-      </div>
-    </div>
+      {formError && <p style={{color:"red"}}>{formError}</p>}
 
-    {/* FOOTER */}
-    <footer className="footer">
-      <div className="footer-l">TestGen AI — CBSE School Test Generator · testgenbud@gmail.com</div>
-      <div className="footer-r">
-        <span className="nav-dot"/>
-        <span>SYSTEM ONLINE</span>
-      </div>
-    </footer>
-    </>
+    </div>
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+
 </script>
 </body>
 </html>
