@@ -428,11 +428,20 @@ function App(){
       if(!raw||!raw.trim())throw new Error('Empty response from server (status '+res.status+')');
 
       if(testType==='offline'){
-        // New backend contract: { questionDocumentId, keyDocumentId }
-        // No text parsing — just read the two document ids straight off the JSON body.
+        // New backend contract: { questionDocumentId, keyDocumentId } (n8n sometimes
+        // prefixes string outputs with '=' — same quirk already handled for form_link
+        // below — and may return the object wrapped in an array). Strip that before parsing.
+        let cleaned=raw.trim().replace(/^=+/,'').trim();
         let json;
-        try{ json=JSON.parse(raw); }
-        catch(e){ throw new Error('Unexpected response from server.'); }
+        try{
+          json=JSON.parse(cleaned);
+        }catch(e){
+          throw new Error('Unexpected response from server.');
+        }
+        // Defend against a double-encoded response (a JSON string containing the real JSON).
+        if(typeof json==='string'){
+          try{ json=JSON.parse(json); }catch(e){ /* leave as-is, handled below */ }
+        }
         const obj=Array.isArray(json)?(json[0]||{}):(json||{});
         const questionDocumentId=obj.questionDocumentId||null;
         const keyDocumentId=obj.keyDocumentId||null;
