@@ -116,6 +116,10 @@ select.tg-input option{background:var(--bg2)}
 .btn-sec.green:hover{background:rgba(16,185,129,0.15)}
 .btn-sec.amber{border-color:rgba(245,166,35,0.3);color:var(--amber);background:var(--amber-dim)}
 .btn-sec.amber:hover{background:rgba(245,166,35,0.2)}
+.btn-sec[aria-disabled="true"]{opacity:0.35;pointer-events:none;cursor:not-allowed}
+.btn-download{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--amber),#E8820A);font-family:var(--ff);font-size:13px;font-weight:600;color:#fff;cursor:pointer;text-decoration:none;transition:all 0.15s;box-shadow:0 2px 12px rgba(245,166,35,0.2)}
+.btn-download:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(245,166,35,0.32)}
+.btn-download[aria-disabled="true"]{opacity:0.35;pointer-events:none;cursor:not-allowed;box-shadow:none;transform:none}
 .loader-wrap{text-align:center;padding:12px 0 4px}
 .loader-bar{height:2px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:10px}
 .loader-fill{height:100%;background:linear-gradient(90deg,transparent,var(--amber),transparent);animation:scan 1.6s ease-in-out infinite;width:40%}
@@ -156,6 +160,9 @@ select.tg-input option{background:var(--bg2)}
 .offline-success-icon{font-size:28px;line-height:1}
 .offline-success-title{font-size:15px;font-weight:700;color:var(--green);letter-spacing:-0.3px}
 .offline-success-sub{font-size:12.5px;color:var(--text2);margin-top:3px}
+.doc-actions-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px 0;text-align:center}
+.doc-actions-label{font-size:12.5px;color:var(--text3)}
+.doc-actions-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .scroll-fade{position:sticky;bottom:0;height:40px;background:linear-gradient(transparent,var(--panel));pointer-events:none;margin-top:-40px}
 .how{padding:60px 32px;max-width:1200px;margin:0 auto}
 .how-title{font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--amber);text-align:center;margin-bottom:8px}
@@ -191,8 +198,10 @@ select.tg-input option{background:var(--bg2)}
 <div id="root"></div>
 <script type="text/babel">
 const {useState,useRef,useEffect,useCallback}=React;
+
 const W1='https://mytestgen.app.n8n.cloud/webhook/c12174e9-3bdd-4a62-bca0-9df11d65d31e';
 const W2='https://mytestgen.app.n8n.cloud/webhook/88784932-ca43-4740-9718-091d8beb1575';
+
 const SYLLABUS={
 "Class 6":{"Science":{"Food":["Food Sources","Components of Food","Cleaning Food"],"Materials":["Sorting Materials","Separation of Substances","Changes Around Us"],"Living World":["Getting to Know Plants","Body Movements","Living Organisms & Surroundings"],"Moving Things":["Motion & Measurement","Light Shadows & Reflections","Electricity & Circuits"],"Natural Resources":["Water","Air Around Us","Garbage In Garbage Out"]},"Mathematics":{"Number System":["Knowing Numbers","Whole Numbers","Playing with Numbers","Integers"],"Geometry":["Basic Geometrical Ideas","Understanding Elementary Shapes","Symmetry","Practical Geometry"],"Algebra":["Introduction to Algebra","Ratio & Proportion"],"Mensuration":["Perimeter & Area"],"Data Handling":["Data Handling"]},"Social Science":{"History":["What Where How and When","From Hunting to Farming","In the Earliest Cities","What Books and Burials Tell Us","Kingdoms Kings and Early Republic","New Questions and Ideas","Ashoka the Emperor","Vital Villages and Thriving Towns"],"Geography":["The Earth in the Solar System","Globe Latitudes and Longitudes","Motions of the Earth","Maps","Major Domains of the Earth","Our Country India"],"Civics":["Understanding Diversity","Unity in Diversity","What is Government","Key Elements of Democratic Government","Panchayati Raj","Rural Administration","Urban Administration","Rural Livelihoods","Urban Livelihoods"]},"English":{"Reading":["Comprehension Passages","Poetry Appreciation","Reading for Information"],"Writing":["Paragraph Writing","Letter Writing","Notice Writing","Diary Entry"],"Grammar":["Nouns","Pronouns","Verbs","Adjectives","Adverbs","Tenses","Prepositions","Conjunctions"],"Literature":["A Pact with the Sun - Prose","A Pact with the Sun - Poems"]},"Hindi":{"गद्य":["वसंत भाग 1 - कहानी","वसंत भाग 1 - निबंध","दुर्वा भाग 1"],"व्याकरण":["संज्ञा","सर्वनाम","क्रिया","विशेषण","काल","वाक्य भेद","मुहावरे"],"रचना":["निबंध लेखन","पत्र लेखन","अनुच्छेद लेखन"]},"Computer Science":{"Basics":["Introduction to Computers","Parts of Computer","Input Output Devices","Memory & Storage"],"Software":["Operating System","MS Word","MS Excel","MS PowerPoint"],"Internet":["Introduction to Internet","Email","Web Browsing","Digital Safety"]}},
 "Class 7":{"Science":{"Nutrition":["Nutrition in Plants","Nutrition in Animals"],"Heat & Temperature":["Heat","Acids Bases & Salts"],"Physical & Chemical Changes":["Physical & Chemical Changes","Weather Climate & Adaptations"],"Winds & Water":["Winds Storms & Cyclones","Water"],"Living World":["Transportation in Animals & Plants","Reproduction in Plants","Motion & Time","Electric Current"],"Light":["Light","Forests Our Lifeline","Wastewater Story"]},"Mathematics":{"Number System":["Integers","Fractions & Decimals","Rational Numbers"],"Algebra":["Simple Equations","Exponents & Powers"],"Geometry":["Lines & Angles","Triangles","Congruence of Triangles","Symmetry","Visualising Solid Shapes"],"Ratio & Proportion":["Ratio & Proportion","Percentage","Profit & Loss","Simple Interest"],"Data Handling":["Data Handling","Probability"]},"Social Science":{"History":["Tracing Changes Through 1000 Years","New Kings and Kingdoms","Delhi Sultans","The Mughal Empire","Rulers and Buildings","Towns Traders and Craftspersons","Tribes Nomads and Settled Communities","Devotional Paths to the Divine","The Making of Regional Cultures","18th Century Political Formations"],"Geography":["Environment","Inside Our Earth","Our Changing Earth","Air","Water","Natural Vegetation and Wildlife","Human Environment"],"Civics":["On Equality","Role of the Government in Health","How the State Government Works","Growing up as Boys and Girls","Women Change the World","Understanding Media","Understanding Advertising","Markets Around Us","A Shirt in the Market"]},"English":{"Reading":["Comprehension","Poetry","Reading Skills"],"Writing":["Essay Writing","Letter Writing","Story Writing","Report Writing"],"Grammar":["Parts of Speech","Tenses","Voice","Narration","Clauses","Punctuation"],"Literature":["Honeycomb Prose","Honeycomb Poems","An Alien Hand Supplementary"]},"Hindi":{"गद्य":["वसंत भाग 2","दुर्वा भाग 2","बाल महाभारत"],"व्याकरण":["शब्द विचार","संधि","समास","अलंकार","रस","छंद"],"रचना":["निबंध","पत्र","संवाद लेखन","सारांश"]},"Computer Science":{"Programming":["Introduction to Scratch","Basic Algorithms","Flowcharts"],"Applications":["Advanced MS Office","Spreadsheets","Presentations"],"Internet":["Search Engines","Online Safety","Digital Footprint","Cyberbullying"]}},
@@ -204,8 +213,10 @@ const SYLLABUS={
 "JEE Mains":{"Physics":{"Mechanics":["Kinematics","Laws of Motion","Work Energy Power","Rotational Motion","Gravitation","Properties of Matter"],"Thermodynamics":["Thermal Properties","Laws of Thermodynamics","Kinetic Theory of Gases","Heat Transfer"],"Waves & Optics":["Oscillations","Waves","Ray Optics","Wave Optics"],"Electromagnetism":["Electrostatics","Current Electricity","Magnetic Effects","Electromagnetic Induction","AC Circuits","EM Waves"],"Modern Physics":["Dual Nature of Radiation","Atoms & Nuclei","Semiconductors","Communication Systems"]},"Chemistry":{"Physical Chemistry":["Mole Concept","Atomic Structure","Chemical Bonding","States of Matter","Thermodynamics","Equilibrium","Electrochemistry","Chemical Kinetics","Surface Chemistry"],"Inorganic Chemistry":["Periodic Table","s-Block Elements","p-Block Elements","d & f Block Elements","Coordination Compounds","Metallurgy","Environmental Chemistry"],"Organic Chemistry":["Basic Concepts","Hydrocarbons","Haloalkanes","Alcohols & Ethers","Aldehydes & Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"]},"Mathematics":{"Algebra":["Sets & Relations","Complex Numbers","Sequences & Series","Permutations & Combinations","Binomial Theorem","Matrices & Determinants","Probability"],"Calculus":["Limits & Continuity","Differentiation","Applications of Derivatives","Integration","Definite Integrals","Differential Equations"],"Coordinate Geometry":["Straight Lines","Circles","Parabola","Ellipse","Hyperbola","3D Geometry"],"Trigonometry":["Trigonometric Functions","Inverse Trigonometry","Properties of Triangles"]}},
 "NEET":{"Physics":{"Mechanics":["Kinematics","Laws of Motion","Work Energy Power","Rotational Motion","Gravitation"],"Thermodynamics":["Thermal Properties","Laws of Thermodynamics","Kinetic Theory"],"Waves & Optics":["Oscillations","Waves","Ray Optics","Wave Optics"],"Electromagnetism":["Electrostatics","Current Electricity","Magnetic Effects","EM Induction"],"Modern Physics":["Dual Nature","Atoms & Nuclei","Semiconductors"]},"Chemistry":{"Physical Chemistry":["Mole Concept","Atomic Structure","Chemical Bonding","Thermodynamics","Equilibrium","Electrochemistry","Chemical Kinetics"],"Inorganic Chemistry":["Periodic Table","s-Block","p-Block","d-Block","Coordination Compounds","Metallurgy"],"Organic Chemistry":["Basic Concepts","Hydrocarbons","Haloalkanes","Alcohols","Aldehydes & Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"]},"Biology":{"Botany":["Cell Biology","Plant Morphology","Plant Physiology","Reproduction in Plants","Genetics","Evolution","Ecology"],"Zoology":["Animal Kingdom","Human Physiology","Animal Reproduction","Human Reproduction","Genetics & Evolution","Biology in Human Welfare","Biotechnology","Ecology"]}}
 };
+
 function toTitle(s){return s.trim().replace(/\w\S*/g,t=>t.charAt(0).toUpperCase()+t.substr(1).toLowerCase());}
 function calcTime(n,d){return Math.ceil(n*2*(d==='Easy'?0.8:d==='Hard'?1.2:1.0));}
+
 function parseTest(raw){
   let c=raw.replace(/^=\s*/,'').trim();
   c=c.replace(/\n\s+([A-D][.)]\s)/g,'\n$1');
@@ -215,6 +226,81 @@ function parseTest(raw){
   const cl=c.toLowerCase();
   const ak=cl.search(/answer\s*key/);
   return{cleaned:c,questions:ak>0?c.slice(0,ak).trim():c,answerKey:ak>0?c.slice(ak).trim():''};
+}
+
+// ---- Document URL helpers (offline branch) ----
+function buildViewUrl(docId){
+  return docId ? ('https://docs.google.com/document/d/'+docId+'/edit') : null;
+}
+function buildDownloadUrl(docId){
+  return docId ? ('https://docs.google.com/document/d/'+docId+'/export?format=docx') : null;
+}
+
+function EyeIcon(){
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  );
+}
+function DownloadIcon(){
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  );
+}
+
+// Shared component: View / Download buttons for a generated Google Doc.
+// Renders disabled (non-throwing) buttons if docId is missing.
+function DocActionButtons({docId,downloadName}){
+  const viewUrl=buildViewUrl(docId);
+  const downloadUrl=buildDownloadUrl(docId);
+  const disabled=!docId;
+  return (
+    <div className="doc-actions-row">
+      <a
+        className="btn-sec"
+        href={viewUrl||undefined}
+        target="_blank"
+        rel="noreferrer"
+        aria-disabled={disabled}
+        onClick={e=>{if(disabled)e.preventDefault();}}
+        tabIndex={disabled?-1:0}
+      >
+        <EyeIcon/> View Document
+      </a>
+      <a
+        className="btn-download"
+        href={downloadUrl||undefined}
+        aria-disabled={disabled}
+        onClick={e=>{if(disabled)e.preventDefault();}}
+        download={disabled?undefined:(downloadName||true)}
+        tabIndex={disabled?-1:0}
+      >
+        <DownloadIcon/> Download Word
+      </a>
+    </div>
+  );
+}
+
+// Shared component: Difficulty selector, used identically by Online and Offline modes.
+function DifficultySelector({value,onChange}){
+  return (
+    <div className="field-full">
+      <label className="field-label">Difficulty <span>*</span></label>
+      <div className="seg">
+        {[['Easy','🟢'],['Moderate','🟡'],['Hard','🔴'],['Mixed','🎲']].map(([d,icon])=>(
+          <button key={d} className={'seg-btn '+(value===d?'active-'+d.toLowerCase():'')} onClick={()=>onChange(d)}>
+            {icon} {d}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function MultiSelect({options,selected,onChange,placeholder,disabled}){
@@ -248,6 +334,7 @@ function MultiSelect({options,selected,onChange,placeholder,disabled}){
     </div>
   );
 }
+
 function App(){
   const [step,setStep]=useState(1);
   const [testType,setTestType]=useState('online');
@@ -264,7 +351,8 @@ function App(){
   const [teacherId,setTeacherId]=useState('');
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState('');
-  const [result,setResult]=useState(null);
+  const [result,setResult]=useState(null);       // online: parsed text result
+  const [offlineDocs,setOfflineDocs]=useState(null); // offline: {questionDocumentId, keyDocumentId}
   const [meta,setMeta]=useState(null);
   const [activeTab,setActiveTab]=useState('questions');
   const [formLoading,setFormLoading]=useState(false);
@@ -288,11 +376,13 @@ function App(){
     setTestType(tt);
     setError('');
     setResult(null);
+    setOfflineDocs(null);
     setMeta(null);
     setFormData(null);
     setFormError('');
     setStep(1);
   }
+
   async function generate(){
     // Validate shared fields
     if(!examType||!subject||chapters.length===0||topics.length===0){
@@ -302,9 +392,10 @@ function App(){
     if(testType==='online'){
       if(!difficulty||!numQ){setError('Please fill in all required fields.');return;}
     }else{
-      if(!maxMarks||!teacherId.trim()){setError('Please fill in all required fields.');return;}
+      if(!difficulty||!maxMarks||!teacherId.trim()){setError('Please fill in all required fields.');return;}
     }
-    setError('');setLoading(true);setResult(null);setFormData(null);setFormError('');
+
+    setError('');setLoading(true);setResult(null);setOfflineDocs(null);setFormData(null);setFormError('');
 
     let payload;
     if(testType==='online'){
@@ -325,6 +416,7 @@ function App(){
         exam_type:examType,
         subject:toTitle(subject),
         chapters,topics,
+        difficulty,
         maximum_marks:parseInt(maxMarks),
         teacher_id:teacherId.trim()
       };
@@ -334,45 +426,64 @@ function App(){
       const res=await fetch(W1,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
       const raw=await res.text();
       if(!raw||!raw.trim())throw new Error('Empty response from server (status '+res.status+')');
-      let text,testId;
-      try{
-        const j=JSON.parse(raw);
-        testId=j.test_id||null;
-        if(j.questions&&Array.isArray(j.questions)&&j.questions.length>0){
-          let built='QUESTIONS:\n\n';
-          j.questions.forEach(q=>{
-            built+=q.number+'. '+q.question+'\n';
-            const opts=q.options||[q.option1,q.option2,q.option3,q.option4].filter(Boolean);
-            ['A','B','C','D'].forEach((l,i)=>{if(opts[i])built+=l+') '+opts[i]+'\n';});
-            built+='\n';
-          });
-          const hasAnswers=j.questions.some(q=>q.correct_answer||q.correctAnswer||q.answer||q.correct_index!==undefined);
-          if(hasAnswers){
-            built+='\nANSWER KEY:\n\n';
-            const labels=['A','B','C','D'];
+
+      if(testType==='offline'){
+        // New backend contract: { questionDocumentId, keyDocumentId }
+        // No text parsing — just read the two document ids straight off the JSON body.
+        let json;
+        try{ json=JSON.parse(raw); }
+        catch(e){ throw new Error('Unexpected response from server.'); }
+        const obj=Array.isArray(json)?(json[0]||{}):(json||{});
+        const questionDocumentId=obj.questionDocumentId||null;
+        const keyDocumentId=obj.keyDocumentId||null;
+        setOfflineDocs({questionDocumentId,keyDocumentId});
+        setMeta({...payload});
+        setStep(2);
+        setActiveTab('questions');
+        setTimeout(()=>resultRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100);
+      }else{
+        let text,testId;
+        try{
+          const j=JSON.parse(raw);
+          testId=j.test_id||null;
+          if(j.questions&&Array.isArray(j.questions)&&j.questions.length>0){
+            let built='QUESTIONS:\n\n';
             j.questions.forEach(q=>{
-              const ans=q.correct_answer||q.correctAnswer||q.answer||labels[q.correct_index]||'A';
-              const explanation=q.explanation||q.reason||'';
-              built+=q.number+'. Answer: '+ans+'\n';
-              if(explanation)built+='Explanation: '+explanation+'\n';
+              built+=q.number+'. '+q.question+'\n';
+              const opts=q.options||[q.option1,q.option2,q.option3,q.option4].filter(Boolean);
+              ['A','B','C','D'].forEach((l,i)=>{if(opts[i])built+=l+') '+opts[i]+'\n';});
               built+='\n';
             });
+            const hasAnswers=j.questions.some(q=>q.correct_answer||q.correctAnswer||q.answer||q.correct_index!==undefined);
+            if(hasAnswers){
+              built+='\nANSWER KEY:\n\n';
+              const labels=['A','B','C','D'];
+              j.questions.forEach(q=>{
+                const ans=q.correct_answer||q.correctAnswer||q.answer||labels[q.correct_index]||'A';
+                const explanation=q.explanation||q.reason||'';
+                built+=q.number+'. Answer: '+ans+'\n';
+                if(explanation)built+='Explanation: '+explanation+'\n';
+                built+='\n';
+              });
+            }
+            text=built;
+          }else{
+            text=j.generated_text||j.output||j.result||raw;
           }
-          text=built;
-        }else{
-          text=j.generated_text||j.output||j.result||raw;
-        }
-      }catch(e){text=raw;testId=null;}
-      if(!text||!text.trim())throw new Error('Empty response. Please try again.');
-      const parsed=parseTest(text);
-      setResult(parsed);
-      setMeta({...payload,test_id:testId});
-      setStep(2);
-      setActiveTab('questions');
-      setTimeout(()=>resultRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100);
+        }catch(e){text=raw;testId=null;}
+
+        if(!text||!text.trim())throw new Error('Empty response. Please try again.');
+        const parsed=parseTest(text);
+        setResult(parsed);
+        setMeta({...payload,test_id:testId});
+        setStep(2);
+        setActiveTab('questions');
+        setTimeout(()=>resultRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100);
+      }
     }catch(e){setError('Generation failed: '+e.message);}
     finally{setLoading(false);}
   }
+
   async function createForm(){
     if(!meta?.test_id){setFormError('No Test ID — please regenerate.');return;}
     setFormLoading(true);setFormError('');
@@ -391,384 +502,424 @@ function App(){
   // Dynamic step labels based on test type
   const stepsConfig=testType==='online'
     ?[
-        {n:1,label:'Configure',desc:'Class, subject & topics'},
-        {n:2,label:'Generate',desc:'AI creates questions'},
-        {n:3,label:'Deliver',desc:'Google Form for students'}
-      ]
+      {n:1,label:'Configure',desc:'Class, subject & topics'},
+      {n:2,label:'Generate',desc:'AI creates questions'},
+      {n:3,label:'Deliver',desc:'Google Form for students'}
+    ]
     :[
-        {n:1,label:'Configure',desc:'Class, subject & marks'},
-        {n:2,label:'Generate',desc:'AI creates questions'},
-        {n:3,label:'Download',desc:'Download Word file'}
-      ];
+      {n:1,label:'Configure',desc:'Class, subject & marks'},
+      {n:2,label:'Generate',desc:'AI creates questions'},
+      {n:3,label:'Download',desc:'Download Word file'}
+    ];
 
   return(
     <>
-    {/* NAV */}
-    <nav className="nav">
-      <div className="nav-logo">
-        <div className="nav-logo-mark">T</div>
-        TestGen<span style={{color:'var(--amber)'}}>AI</span>
-      </div>
-      <div className="nav-right">
-        <div className="nav-dot"/>
-        <span className="nav-status">Live</span>
-        <span className="nav-tag">CBSE · CLASS 6–12</span>
-      </div>
-    </nav>
-    {/* HERO */}
-    <div className="hero">
-      <div className="hero-eyebrow a1">⚡ AI-Powered Test Generation</div>
-      <h1 className="hero-h1 a2">
-        Generate <span className="hi">Online &amp; Offline CBSE Tests</span><br/>in Seconds
-      </h1>
-      <p className="hero-sub a3">
-        Syllabus-aligned question papers for Class 6–12, all subjects. Create auto-graded Google Forms for online delivery or printable Word papers for offline classrooms.
-      </p>
-      <div className="hero-stats a4">
-        {[['30s','Generation'],['Class 6–12','All Classes'],['7+','Subjects']].map(([n,l])=>(
-          <div key={l} className="hstat">
-            <div className="hstat-n">{n}</div>
-            <div className="hstat-l">{l}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* MAIN */}
-    <div className="main">
-      {/* STEP INDICATOR */}
-      <div className="steps a4">
-        {stepsConfig.map(s=>(
-          <div key={s.n} className={'step '+(step===s.n?'active':step>s.n?'done':'')} onClick={()=>s.n<=step&&setStep(s.n)}>
-            <div className="step-num">{step>s.n?'✓':s.n}</div>
-            <div className="step-info">
-              <div className="step-label">{s.label}</div>
-              <div className="step-desc">{s.desc}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* FORM CARD */}
-      <div className="card a4">
-        <div className="card-header">
-          <div>
-            <div className="card-title">Test Configuration</div>
-            <div className="card-sub">Configure your test parameters below</div>
-          </div>
-          {meta&&<span className="res-ok">✓ Test Ready</span>}
+      {/* NAV */}
+      <nav className="nav">
+        <div className="nav-logo">
+          <div className="nav-logo-mark">T</div>
+          TestGen<span style={{color:'var(--amber)'}}>AI</span>
         </div>
-        <div className="card-body">
+        <div className="nav-right">
+          <div className="nav-dot"/>
+          <span className="nav-status">Live</span>
+          <span className="nav-tag">CBSE · CLASS 6–12</span>
+        </div>
+      </nav>
 
-          {/* ── Test Type Segmented Control ── */}
-          <div style={{marginBottom:'20px'}}>
-            <label className="field-label">Test Type <span>*</span></label>
-            <div className="seg">
-              <button
-                className={'seg-btn '+(testType==='online'?'active-online':'')}
-                onClick={()=>switchTestType('online')}
-              >🌐 Online Test</button>
-              <button
-                className={'seg-btn '+(testType==='offline'?'active-offline':'')}
-                onClick={()=>switchTestType('offline')}
-              >📝 Offline Test</button>
+      {/* HERO */}
+      <div className="hero">
+        <div className="hero-eyebrow a1">⚡ AI-Powered Test Generation</div>
+        <h1 className="hero-h1 a2">
+          Generate <span className="hi">Online &amp; Offline CBSE Tests</span><br/>in Seconds
+        </h1>
+        <p className="hero-sub a3">
+          Syllabus-aligned question papers for Class 6–12, all subjects. Create auto-graded Google Forms for online delivery or printable Word papers for offline classrooms.
+        </p>
+        <div className="hero-stats a4">
+          {[['30s','Generation'],['Class 6–12','All Classes'],['7+','Subjects']].map(([n,l])=>(
+            <div key={l} className="hstat">
+              <div className="hstat-n">{n}</div>
+              <div className="hstat-l">{l}</div>
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          <div className="divider"/>
+      {/* MAIN */}
+      <div className="main">
+        {/* STEP INDICATOR */}
+        <div className="steps a4">
+          {stepsConfig.map(s=>(
+            <div key={s.n} className={'step '+(step===s.n?'active':step>s.n?'done':'')} onClick={()=>s.n<=step&&setStep(s.n)}>
+              <div className="step-num">{step>s.n?'✓':s.n}</div>
+              <div className="step-info">
+                <div className="step-label">{s.label}</div>
+                <div className="step-desc">{s.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
 
-          {/* ── Shared Fields (Class, Subject, Chapters, Topics) ── */}
-          <div className="form-grid">
-            {/* Class */}
+        {/* FORM CARD */}
+        <div className="card a4">
+          <div className="card-header">
             <div>
-              <label className="field-label">Class / Exam <span>*</span></label>
-              <select className="tg-input" value={examType} onChange={e=>setExamType(e.target.value)}>
-                <option value="">Select class or exam</option>
-                <optgroup label="CBSE School">
-                  {['Class 6','Class 7','Class 8','Class 9','Class 10','Class 11','Class 12'].map(c=><option key={c}>{c}</option>)}
-                </optgroup>
-                <optgroup label="Competitive Exams">
-                  <option>JEE Mains</option><option>NEET</option>
-                </optgroup>
-              </select>
+              <div className="card-title">Test Configuration</div>
+              <div className="card-sub">Configure your test parameters below</div>
             </div>
-            {/* Subject */}
-            <div>
-              <label className="field-label">Subject <span>*</span></label>
-              <select className="tg-input" value={subject} onChange={e=>setSubject(e.target.value)} disabled={!examType}>
-                <option value="">Select subject</option>
-                {subjects.map(s=><option key={s}>{s}</option>)}
-              </select>
-            </div>
-            {/* Chapters */}
-            <div className="field-full">
-              <label className="field-label">Chapters <span>*</span></label>
-              <MultiSelect options={chapterOpts} selected={chapters} onChange={setChapters} placeholder="Select one or more chapters…" disabled={!subject}/>
-            </div>
-            {/* Topics */}
-            <div className="field-full">
-              <label className="field-label">Topics <span>*</span></label>
-              <MultiSelect options={topicOpts} selected={topics} onChange={setTopics} placeholder="Select topics to include…" disabled={chapters.length===0}/>
-            </div>
+            {meta&&<span className="res-ok">✓ Test Ready</span>}
           </div>
-          {/* ── ONLINE-ONLY FIELDS ── */}
-          {testType==='online' && (
-          <>
-          <div className="divider"/>
-          <div className="form-grid thirds">
-            {/* Difficulty */}
-            <div className="field-full">
-              <label className="field-label">Difficulty <span>*</span></label>
+          <div className="card-body">
+
+            {/* ── Test Type Segmented Control ── */}
+            <div style={{marginBottom:'20px'}}>
+              <label className="field-label">Test Type <span>*</span></label>
               <div className="seg">
-                {[['Easy','🟢'],['Moderate','🟡'],['Hard','🔴'],['Mixed','🎲']].map(([d,icon])=>(
-                  <button key={d} className={'seg-btn '+(difficulty===d?'active-'+d.toLowerCase():'')} onClick={()=>setDifficulty(d)}>
-                    {icon} {d}
-                  </button>
-                ))}
+                <button className={'seg-btn '+(testType==='online'?'active-online':'')} onClick={()=>switchTestType('online')}>🌐 Online Test</button>
+                <button className={'seg-btn '+(testType==='offline'?'active-offline':'')} onClick={()=>switchTestType('offline')}>📝 Offline Test</button>
               </div>
             </div>
-            {/* Questions */}
-            <div>
-              <label className="field-label">No. of Questions <span>*</span></label>
-              <input className="tg-input" type="number" placeholder="e.g. 10" min="1" max="30" value={numQ} onChange={e=>setNumQ(e.target.value)}/>
-            </div>
-            {/* Time */}
-            <div>
-              <label className="field-label">Time Limit (min)</label>
-              <input className="tg-input" type="number" placeholder="Auto" value={timeLimit} onChange={e=>setTimeLimit(e.target.value)}/>
-              {suggestedTime&&<div className="time-hint"><span className="time-dot"/>{suggestedTime} min recommended</div>}
-            </div>
-          </div>
-          <div className="divider"/>
-          {/* Mode */}
-          <div style={{marginBottom:'20px'}}>
-            <label className="field-label">Generation Mode</label>
-            <div className="seg">
-              <button className={'seg-btn '+(mode==='ai_only'?'active-ai_only':'')} onClick={()=>setMode('ai_only')}>🤖 AI Generated</button>
-              <button className="seg-btn soon" onClick={()=>setMode('mixed')}>⚡ Mixed (50/50) <span className="soon-tag">SOON</span></button>
-              <button className="seg-btn soon" onClick={()=>setMode('pyq')}>📚 PYQ Only <span className="soon-tag">SOON</span></button>
-            </div>
-          </div>
-          {/* Email */}
-          <div style={{marginBottom:'24px'}}>
-            <label className="field-label">Teacher Email</label>
-            <input className="tg-input" type="email" placeholder="teacher@school.com" value={email} onChange={e=>setEmail(e.target.value)} style={{maxWidth:'360px'}}/>
-          </div>
-          </>
-          )}
 
-          {/* ── OFFLINE-ONLY FIELDS ── */}
-          {testType==='offline' && (
-          <>
-          <div className="divider"/>
-          <div className="form-grid">
-            {/* Maximum Marks */}
-            <div>
-              <label className="field-label">Maximum Marks <span>*</span></label>
-              <select className="tg-input" value={maxMarks} onChange={e=>setMaxMarks(e.target.value)}>
-                <option value="">Select marks</option>
-                <option value="20">20 Marks</option>
-                <option value="30">30 Marks</option>
-                <option value="40">40 Marks</option>
-                <option value="50">50 Marks</option>
-                <option value="80">80 Marks</option>
-              </select>
-            </div>
-            {/* Teacher ID */}
-            <div>
-              <label className="field-label">Teacher ID <span>*</span></label>
-              <input className="tg-input" type="text" placeholder="Enter Teacher ID" value={teacherId} onChange={e=>setTeacherId(e.target.value)}/>
-            </div>
-          </div>
-          <div style={{height:'8px'}}/>
-          </>
-          )}
-          {/* Submit */}
-          <button className="btn-gen" onClick={generate} disabled={loading}>
-            {loading
-              ? <>⏳ Generating questions…</>
-              : testType==='online'
-                ? <>⚡ Generate Test Paper →</>
-                : <>📝 Create Offline Test</>
-            }
-          </button>
+            <div className="divider"/>
 
-          {/* Loader */}
-          {loading&&(
-            <div className="loader-wrap">
-              <div className="loader-bar"><div className="loader-fill"/></div>
-              <div className="loader-txt">
-                <span className="blink">▋</span> AI IS WRITING YOUR QUESTIONS
-              </div>
-            </div>
-          )}
-
-          {/* Error */}
-          {error&&(
-            <div className="err">
-              <span>⚠</span><span>{error}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* RESULTS */}
-      {result&&(
-        <div className="card results-card" ref={resultRef}>
-          {/* Header */}
-          <div className="res-header">
-            <div className="res-title">
-              Test Paper Generated
-              <span className="res-ok">✓ SUCCESS</span>
-            </div>
-            <div className="res-actions">
-              <button className="btn-sec" onClick={()=>{
-                const blob=new Blob([result.cleaned],{type:'text/plain'});
-                const a=document.createElement('a');
-                a.href=URL.createObjectURL(blob);
-                a.download=(meta?.exam_type||'test')+'_'+(meta?.subject||'paper')+'_test.txt';
-                a.click();
-              }}>⬇ Download</button>
-              <button className="btn-sec" onClick={()=>navigator.clipboard?.writeText(result.cleaned)}>⎘ Copy</button>
-              <button className="btn-sec amber" onClick={()=>{setResult(null);setFormData(null);setFormError('');setStep(1);}}>↺ Regenerate</button>
-            </div>
-          </div>
-          {/* Meta chips */}
-          <div className="meta-row">
-            {meta&&(
-              testType==='online'
-              ?[meta.exam_type,meta.subject,meta.difficulty,meta.num_questions+' Questions',meta.time_limit+' min',meta.mode==='ai_only'?'AI Generated':'Mixed'].map(v=>(
-                <span key={v} className={'meta-chip '+(v===meta.difficulty?'amber':'')}>{v}</span>
-              ))
-              :[meta.exam_type,meta.subject,meta.maximum_marks+' Marks','Offline Paper','AI Generated'].map(v=>(
-                <span key={v} className="meta-chip">{v}</span>
-              ))
-            )}
-            {meta?.test_id&&<span className="meta-chip" style={{fontFamily:'var(--mono)',fontSize:'10px'}}>ID: {meta.test_id}</span>}
-          </div>
-
-          {/* Tabs */}
-          <div className="tabs">
-            {[['questions','Questions'],['answerkey','Answer Key'],['full','Full Paper']].map(([id,label])=>(
-              <div key={id} className={'tab '+(activeTab===id?'active':'')} onClick={()=>setActiveTab(id)}>
-                {label}
-              </div>
-            ))}
-          </div>
-
-          {/* Tab content */}
-          <div className="tab-content">
-            {activeTab==='questions'&&(
-              <div className="md-out" dangerouslySetInnerHTML={{__html:marked.parse(result.questions||result.cleaned||'')}}/>
-            )}
-            {activeTab==='answerkey'&&(
-              <div className="md-out" dangerouslySetInnerHTML={{__html:marked.parse(
-                result.answerKey && result.answerKey.trim()
-                  ? result.answerKey
-                  : '_Answer key not available. This may be because the AI response did not include one. Try regenerating the test._'
-              )}}/>
-            )}
-            {activeTab==='full'&&(
-              <div className="md-out" dangerouslySetInnerHTML={{__html:marked.parse(result.cleaned||'')}}/>
-            )}
-          </div>
-          <div className="scroll-fade"/>
-          {/* Google Form panel — ONLINE ONLY */}
-          {testType==='online' && (
-          <div className="form-panel">
-            <div className="form-panel-info">
-              <div className="form-panel-title">📋 Create Google Form Quiz</div>
-              <div className="form-panel-sub">Auto-generate a timed Google Form and share with students</div>
-            </div>
-            <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
-              {!formData&&(
-                <button className="btn-sec green" onClick={createForm} disabled={formLoading}>
-                  {formLoading?'⏳ Creating…':'✦ Create Google Form'}
-                </button>
-              )}
-              {formData?.form_link&&(
-                <>
-                  <a className="btn-sec green" href={(formData.form_link||'').replace(/^=+/,'')} target="_blank" rel="noreferrer">🔗 Open Form</a>
-                  <button className="btn-sec" onClick={()=>{
-                    const link=(formData.form_link||'').replace(/^=+/,'');
-                    navigator.clipboard.writeText(link).then(()=>alert('Link copied!')).catch(()=>{
-                      const el=document.createElement('textarea');
-                      el.value=link;document.body.appendChild(el);el.select();
-                      document.execCommand('copy');document.body.removeChild(el);
-                      alert('Link copied!');
-                    });
-                  }}>⎘ Copy Link</button>
-                </>
-              )}
-            </div>
-          </div>
-          )}
-
-          {/* Form result link (online) */}
-          {testType==='online' && formData?.form_link&&(
-            <div style={{padding:'0 24px 20px'}}>
-              <div className="form-link-box">
-                <span className="form-link-url">{(formData.form_link||'').replace(/^=+/,'')}</span>
-                <span style={{fontFamily:'var(--mono)',fontSize:'10px',color:'var(--green)',whiteSpace:'nowrap'}}>
-                  {formData.total_questions} questions
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Offline success card — OFFLINE ONLY */}
-          {testType==='offline' && (
-          <div className="offline-success">
-            <div className="offline-success-info">
-              <div className="offline-success-icon">✅</div>
+            {/* ── Shared Fields (Class, Subject, Chapters, Topics) ── */}
+            <div className="form-grid">
+              {/* Class */}
               <div>
-                <div className="offline-success-title">Offline Test Ready</div>
-                <div className="offline-success-sub">Download the generated Word document below.</div>
+                <label className="field-label">Class / Exam <span>*</span></label>
+                <select className="tg-input" value={examType} onChange={e=>setExamType(e.target.value)}>
+                  <option value="">Select class or exam</option>
+                  <optgroup label="CBSE School">
+                    {['Class 6','Class 7','Class 8','Class 9','Class 10','Class 11','Class 12'].map(c=><option key={c}>{c}</option>)}
+                  </optgroup>
+                  <optgroup label="Competitive Exams">
+                    <option>JEE Mains</option><option>NEET</option>
+                  </optgroup>
+                </select>
+              </div>
+              {/* Subject */}
+              <div>
+                <label className="field-label">Subject <span>*</span></label>
+                <select className="tg-input" value={subject} onChange={e=>setSubject(e.target.value)} disabled={!examType}>
+                  <option value="">Select subject</option>
+                  {subjects.map(s=><option key={s}>{s}</option>)}
+                </select>
+              </div>
+              {/* Chapters */}
+              <div className="field-full">
+                <label className="field-label">Chapters <span>*</span></label>
+                <MultiSelect options={chapterOpts} selected={chapters} onChange={setChapters} placeholder="Select one or more chapters…" disabled={!subject}/>
+              </div>
+              {/* Topics */}
+              <div className="field-full">
+                <label className="field-label">Topics <span>*</span></label>
+                <MultiSelect options={topicOpts} selected={topics} onChange={setTopics} placeholder="Select topics to include…" disabled={chapters.length===0}/>
               </div>
             </div>
-            <button className="btn-sec amber" disabled={true}>📄 Download Word File</button>
-          </div>
-          )}
 
-          {/* Form error */}
-          {testType==='online' && formError&&(
-            <div style={{padding:'0 24px 16px'}}>
-              <div className="err"><span>⚠</span><span>{formError}</span></div>
-            </div>
-          )}
+            {/* ── ONLINE-ONLY FIELDS ── */}
+            {testType==='online' && (
+              <>
+                <div className="divider"/>
+                <div className="form-grid thirds">
+                  <DifficultySelector value={difficulty} onChange={setDifficulty}/>
+                  {/* Questions */}
+                  <div>
+                    <label className="field-label">No. of Questions <span>*</span></label>
+                    <input className="tg-input" type="number" placeholder="e.g. 10" min="1" max="30" value={numQ} onChange={e=>setNumQ(e.target.value)}/>
+                  </div>
+                  {/* Time */}
+                  <div>
+                    <label className="field-label">Time Limit (min)</label>
+                    <input className="tg-input" type="number" placeholder="Auto" value={timeLimit} onChange={e=>setTimeLimit(e.target.value)}/>
+                    {suggestedTime&&<div className="time-hint"><span className="time-dot"/>{suggestedTime} min recommended</div>}
+                  </div>
+                </div>
+
+                <div className="divider"/>
+
+                {/* Mode */}
+                <div style={{marginBottom:'20px'}}>
+                  <label className="field-label">Generation Mode</label>
+                  <div className="seg">
+                    <button className={'seg-btn '+(mode==='ai_only'?'active-ai_only':'')} onClick={()=>setMode('ai_only')}>🤖 AI Generated</button>
+                    <button className="seg-btn soon" onClick={()=>setMode('mixed')}>⚡ Mixed (50/50) <span className="soon-tag">SOON</span></button>
+                    <button className="seg-btn soon" onClick={()=>setMode('pyq')}>📚 PYQ Only <span className="soon-tag">SOON</span></button>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div style={{marginBottom:'24px'}}>
+                  <label className="field-label">Teacher Email</label>
+                  <input className="tg-input" type="email" placeholder="teacher@school.com" value={email} onChange={e=>setEmail(e.target.value)} style={{maxWidth:'360px'}}/>
+                </div>
+              </>
+            )}
+
+            {/* ── OFFLINE-ONLY FIELDS ── */}
+            {testType==='offline' && (
+              <>
+                <div className="divider"/>
+                <div className="form-grid thirds">
+                  <DifficultySelector value={difficulty} onChange={setDifficulty}/>
+                </div>
+
+                <div className="divider"/>
+
+                <div className="form-grid">
+                  {/* Maximum Marks */}
+                  <div>
+                    <label className="field-label">Maximum Marks <span>*</span></label>
+                    <select className="tg-input" value={maxMarks} onChange={e=>setMaxMarks(e.target.value)}>
+                      <option value="">Select marks</option>
+                      <option value="20">20 Marks</option>
+                      <option value="30">30 Marks</option>
+                      <option value="40">40 Marks</option>
+                      <option value="50">50 Marks</option>
+                      <option value="80">80 Marks</option>
+                    </select>
+                  </div>
+                  {/* Teacher ID */}
+                  <div>
+                    <label className="field-label">Teacher ID <span>*</span></label>
+                    <input className="tg-input" type="text" placeholder="Enter Teacher ID" value={teacherId} onChange={e=>setTeacherId(e.target.value)}/>
+                  </div>
+                </div>
+                <div style={{height:'8px'}}/>
+              </>
+            )}
+
+            {/* Submit */}
+            <button className="btn-gen" onClick={generate} disabled={loading}>
+              {loading
+                ? <>⏳ Generating questions…</>
+                : testType==='online' ? <>⚡ Generate Test Paper →</> : <>📝 Create Offline Test</>
+              }
+            </button>
+
+            {/* Loader */}
+            {loading&&(
+              <div className="loader-wrap">
+                <div className="loader-bar"><div className="loader-fill"/></div>
+                <div className="loader-txt">
+                  <span className="blink">▋</span> AI IS WRITING YOUR QUESTIONS
+                </div>
+              </div>
+            )}
+
+            {/* Error */}
+            {error&&(
+              <div className="err">
+                <span>⚠</span><span>{error}</span>
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </div>
-    {/* HOW IT WORKS */}
-    <div className="how">
-      <div className="how-title">HOW IT WORKS</div>
-      <h2 className="how-h2">Three steps to a complete test</h2>
-      <div className="how-grid">
-        {[
-          {n:'01',icon:'🎯',title:'Configure',desc:'Select class, subject, chapters and topics. Set difficulty level and number of questions.'},
-          {n:'02',icon:'⚡',title:'Generate',desc:'AI creates syllabus-aligned MCQ questions with answer key and explanations in 30 seconds.'},
-          {n:'03',icon:'📋',title:'Deliver',desc:'One click creates a timed Google Form quiz or a printable Word document. Share the link or hand out papers.'}
-        ].map(c=>(
-          <div key={c.n} className="how-card">
-            <div className="how-n">{c.n}</div>
-            <div className="how-icon">{c.icon}</div>
-            <div className="how-ct">{c.title}</div>
-            <div className="how-cp">{c.desc}</div>
-          </div>
-        ))}
-      </div>
-    </div>
 
-    {/* FOOTER */}
-    <footer className="footer">
-      <div className="footer-l">TestGen AI — CBSE School Test Generator · testgenbud@gmail.com</div>
-      <div className="footer-r">
-        <span className="nav-dot"/>
-        <span>SYSTEM ONLINE</span>
+        {/* ONLINE RESULTS */}
+        {testType==='online' && result&&(
+          <div className="card results-card" ref={resultRef}>
+            {/* Header */}
+            <div className="res-header">
+              <div className="res-title">
+                Test Paper Generated <span className="res-ok">✓ SUCCESS</span>
+              </div>
+              <div className="res-actions">
+                <button className="btn-sec" onClick={()=>{
+                  const blob=new Blob([result.cleaned],{type:'text/plain'});
+                  const a=document.createElement('a');
+                  a.href=URL.createObjectURL(blob);
+                  a.download=(meta?.exam_type||'test')+'_'+(meta?.subject||'paper')+'_test.txt';
+                  a.click();
+                }}>⬇ Download</button>
+                <button className="btn-sec" onClick={()=>navigator.clipboard?.writeText(result.cleaned)}>⎘ Copy</button>
+                <button className="btn-sec amber" onClick={()=>{setResult(null);setFormData(null);setFormError('');setStep(1);}}>↺ Regenerate</button>
+              </div>
+            </div>
+
+            {/* Meta chips */}
+            <div className="meta-row">
+              {meta&&[meta.exam_type,meta.subject,meta.difficulty,meta.num_questions+' Questions',meta.time_limit+' min',meta.mode==='ai_only'?'AI Generated':'Mixed'].map(v=>(
+                <span key={v} className={'meta-chip '+(v===meta.difficulty?'amber':'')}>{v}</span>
+              ))}
+              {meta?.test_id&&<span className="meta-chip" style={{fontFamily:'var(--mono)',fontSize:'10px'}}>ID: {meta.test_id}</span>}
+            </div>
+
+            {/* Tabs */}
+            <div className="tabs">
+              {[['questions','Questions'],['answerkey','Answer Key'],['full','Full Paper']].map(([id,label])=>(
+                <div key={id} className={'tab '+(activeTab===id?'active':'')} onClick={()=>setActiveTab(id)}>
+                  {label}
+                </div>
+              ))}
+            </div>
+
+            {/* Tab content */}
+            <div className="tab-content">
+              {activeTab==='questions'&&(
+                <div className="md-out" dangerouslySetInnerHTML={{__html:marked.parse(result.questions||result.cleaned||'')}}/>
+              )}
+              {activeTab==='answerkey'&&(
+                <div className="md-out" dangerouslySetInnerHTML={{__html:marked.parse(
+                  result.answerKey && result.answerKey.trim()
+                    ? result.answerKey
+                    : '_Answer key not available. This may be because the AI response did not include one. Try regenerating the test._'
+                )}}/>
+              )}
+              {activeTab==='full'&&(
+                <div className="md-out" dangerouslySetInnerHTML={{__html:marked.parse(result.cleaned||'')}}/>
+              )}
+            </div>
+            <div className="scroll-fade"/>
+
+            {/* Google Form panel */}
+            <div className="form-panel">
+              <div className="form-panel-info">
+                <div className="form-panel-title">📋 Create Google Form Quiz</div>
+                <div className="form-panel-sub">Auto-generate a timed Google Form and share with students</div>
+              </div>
+              <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
+                {!formData&&(
+                  <button className="btn-sec green" onClick={createForm} disabled={formLoading}>
+                    {formLoading?'⏳ Creating…':'✦ Create Google Form'}
+                  </button>
+                )}
+                {formData?.form_link&&(
+                  <>
+                    <a className="btn-sec green" href={(formData.form_link||'').replace(/^=+/,'')} target="_blank" rel="noreferrer">🔗 Open Form</a>
+                    <button className="btn-sec" onClick={()=>{
+                      const link=(formData.form_link||'').replace(/^=+/,'');
+                      navigator.clipboard.writeText(link).then(()=>alert('Link copied!')).catch(()=>{
+                        const el=document.createElement('textarea');
+                        el.value=link;document.body.appendChild(el);el.select();
+                        document.execCommand('copy');document.body.removeChild(el);
+                        alert('Link copied!');
+                      });
+                    }}>⎘ Copy Link</button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Form result link */}
+            {formData?.form_link&&(
+              <div style={{padding:'0 24px 20px'}}>
+                <div className="form-link-box">
+                  <span className="form-link-url">{(formData.form_link||'').replace(/^=+/,'')}</span>
+                  <span style={{fontFamily:'var(--mono)',fontSize:'10px',color:'var(--green)',whiteSpace:'nowrap'}}>
+                    {formData.total_questions} questions
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Form error */}
+            {formError&&(
+              <div style={{padding:'0 24px 16px'}}>
+                <div className="err"><span>⚠</span><span>{formError}</span></div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* OFFLINE RESULTS */}
+        {testType==='offline' && offlineDocs&&(
+          <div className="card results-card" ref={resultRef}>
+            {/* Header */}
+            <div className="res-header">
+              <div className="res-title">
+                Test Paper Generated <span className="res-ok">✓ SUCCESS</span>
+              </div>
+              <div className="res-actions">
+                <button className="btn-sec amber" onClick={()=>{setOfflineDocs(null);setFormData(null);setFormError('');setStep(1);}}>↺ Regenerate</button>
+              </div>
+            </div>
+
+            {/* Meta chips */}
+            <div className="meta-row">
+              {meta&&[meta.exam_type,meta.subject,meta.difficulty,meta.maximum_marks+' Marks','Offline Paper'].map(v=>(
+                <span key={v} className={'meta-chip '+(v===meta.difficulty?'amber':'')}>{v}</span>
+              ))}
+            </div>
+
+            {/* Tabs */}
+            <div className="tabs">
+              {[['questions','Questions'],['answerkey','Answer Key']].map(([id,label])=>(
+                <div key={id} className={'tab '+(activeTab===id?'active':'')} onClick={()=>setActiveTab(id)}>
+                  {label}
+                </div>
+              ))}
+            </div>
+
+            {/* Tab content — document action buttons, never raw links or raw text */}
+            <div className="tab-content">
+              {activeTab==='questions'&&(
+                <div className="doc-actions-wrap">
+                  <div className="doc-actions-label">Question paper document</div>
+                  <DocActionButtons
+                    docId={offlineDocs.questionDocumentId}
+                    downloadName={(meta?.exam_type||'test')+'_'+(meta?.subject||'paper')+'_questions.docx'}
+                  />
+                </div>
+              )}
+              {activeTab==='answerkey'&&(
+                <div className="doc-actions-wrap">
+                  <div className="doc-actions-label">Answer key document</div>
+                  <DocActionButtons
+                    docId={offlineDocs.keyDocumentId}
+                    downloadName={(meta?.exam_type||'test')+'_'+(meta?.subject||'paper')+'_answer_key.docx'}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Offline success card */}
+            <div className="offline-success">
+              <div className="offline-success-info">
+                <div className="offline-success-icon">✅</div>
+                <div>
+                  <div className="offline-success-title">Offline Test Ready</div>
+                  <div className="offline-success-sub">Your Word documents have been generated successfully.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </footer>
+
+      {/* HOW IT WORKS */}
+      <div className="how">
+        <div className="how-title">HOW IT WORKS</div>
+        <h2 className="how-h2">Three steps to a complete test</h2>
+        <div className="how-grid">
+          {[
+            {n:'01',icon:'🎯',title:'Configure',desc:'Select class, subject, chapters and topics. Set difficulty level and number of questions.'},
+            {n:'02',icon:'⚡',title:'Generate',desc:'AI creates syllabus-aligned MCQ questions with answer key and explanations in 30 seconds.'},
+            {n:'03',icon:'📋',title:'Deliver',desc:'One click creates a timed Google Form quiz or a printable Word document. Share the link or hand out papers.'}
+          ].map(c=>(
+            <div key={c.n} className="how-card">
+              <div className="how-n">{c.n}</div>
+              <div className="how-icon">{c.icon}</div>
+              <div className="how-ct">{c.title}</div>
+              <div className="how-cp">{c.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <footer className="footer">
+        <div className="footer-l">TestGen AI — CBSE School Test Generator · testgenbud@gmail.com</div>
+        <div className="footer-r">
+          <span className="nav-dot"/>
+          <span>SYSTEM ONLINE</span>
+        </div>
+      </footer>
     </>
   );
 }
+
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
