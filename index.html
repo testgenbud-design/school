@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TestGen AI — CBSE Test Generator</title>
+<title>myTST — CBSE Test Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -428,9 +428,10 @@ function App(){
       if(!raw||!raw.trim())throw new Error('Empty response from server (status '+res.status+')');
 
       if(testType==='offline'){
-        // New backend contract: { questionDocumentId, keyDocumentId } (n8n sometimes
-        // prefixes string outputs with '=' — same quirk already handled for form_link
-        // below — and may return the object wrapped in an array). Strip that before parsing.
+        // Backend contract: { success, questionDocumentId, keyDocumentId, message }
+        // (n8n sometimes prefixes string outputs with '=' — same quirk already handled
+        // for form_link below — and may return the object wrapped in an array). Strip
+        // that before parsing.
         let cleaned=raw.trim().replace(/^=+/,'').trim();
         let json;
         try{
@@ -443,6 +444,9 @@ function App(){
           try{ json=JSON.parse(json); }catch(e){ /* leave as-is, handled below */ }
         }
         const obj=Array.isArray(json)?(json[0]||{}):(json||{});
+        if(obj.success===false){
+          throw new Error(obj.message||'Offline test generation failed.');
+        }
         const questionDocumentId=obj.questionDocumentId||null;
         const keyDocumentId=obj.keyDocumentId||null;
         setOfflineDocs({questionDocumentId,keyDocumentId});
@@ -526,8 +530,8 @@ function App(){
       {/* NAV */}
       <nav className="nav">
         <div className="nav-logo">
-          <div className="nav-logo-mark">T</div>
-          TestGen<span style={{color:'var(--amber)'}}>AI</span>
+          <div className="nav-logo-mark">m</div>
+          myTST
         </div>
         <div className="nav-right">
           <div className="nav-dot"/>
@@ -919,7 +923,7 @@ function App(){
 
       {/* FOOTER */}
       <footer className="footer">
-        <div className="footer-l">TestGen AI — CBSE School Test Generator · testgenbud@gmail.com</div>
+        <div className="footer-l">myTST — CBSE School Test Generator · testgenbud@gmail.com</div>
         <div className="footer-r">
           <span className="nav-dot"/>
           <span>SYSTEM ONLINE</span>
