@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>myTST — CBSE Test Generator</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,__LOGO_BASE64__"/>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -27,7 +28,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 #root{position:relative;z-index:1}
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(8,12,20,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
 .nav-logo{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;letter-spacing:-0.5px;color:var(--text)}
-.nav-logo-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--amber),#E8820A);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;box-shadow:0 0 16px rgba(245,166,35,0.35)}
+.nav-logo-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#1a1030,#0d0620);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(245,166,35,0.28);overflow:hidden;flex-shrink:0}
+.nav-logo-mark img{width:100%;height:100%;object-fit:contain;padding:3px}
 .nav-right{display:flex;align-items:center;gap:12px}
 .nav-tag{font-family:var(--mono);font-size:10px;font-weight:400;color:var(--amber);background:var(--amber-dim);border:1px solid rgba(245,166,35,0.2);padding:3px 9px;border-radius:4px;letter-spacing:1px}
 .nav-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
@@ -67,6 +69,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;back
 .field-full{grid-column:1/-1}
 .field-label{display:block;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
 .field-label span{color:var(--amber)}
+.field-hint{font-size:11px;color:var(--text3);margin-top:6px}
 .tg-input{width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--ff);font-size:13.5px;transition:border-color 0.15s,box-shadow 0.15s;outline:none}
 .tg-input::placeholder{color:var(--text3)}
 .tg-input:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,166,35,0.1)}
@@ -197,25 +200,314 @@ select.tg-input option{background:var(--bg2)}
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const {useState,useRef,useEffect,useCallback}=React;
+const {useState,useRef,useEffect}=React;
 
-const W1='https://mytstco.app.n8n.cloud/webhook/c12174e9-3bdd-4a62-bca0-9df11d65d31e';
-const W2='https://mytstco.app.n8n.cloud/webhook/88784932-ca43-4740-9718-091d8beb1575';
+const LOGO_SRC='data:image/png;base64,__LOGO_BASE64__';
 
+const W1='https://mytestgen.app.n8n.cloud/webhook/c12174e9-3bdd-4a62-bca0-9df11d65d31e';
+const W2='https://mytestgen.app.n8n.cloud/webhook/88784932-ca43-4740-9718-091d8beb1575';
+
+// How long (ms) the browser will wait for the test-generation webhook before
+// giving up. Offline papers with high mark totals can legitimately take
+// several minutes, so this is set generously above that.
+const GENERATION_TIMEOUT_MS=600000; // 10 minutes
+
+// ============================================================
+// SYLLABUS — Class 10, 11, 12 (all streams: Science / Commerce / Humanities)
+// plus JEE Mains & NEET. Structure: subject -> { unit: [chapters...] }
+// ============================================================
 const SYLLABUS={
-"Class 6":{"Science":{"Food":["Food Sources","Components of Food","Cleaning Food"],"Materials":["Sorting Materials","Separation of Substances","Changes Around Us"],"Living World":["Getting to Know Plants","Body Movements","Living Organisms & Surroundings"],"Moving Things":["Motion & Measurement","Light Shadows & Reflections","Electricity & Circuits"],"Natural Resources":["Water","Air Around Us","Garbage In Garbage Out"]},"Mathematics":{"Number System":["Knowing Numbers","Whole Numbers","Playing with Numbers","Integers"],"Geometry":["Basic Geometrical Ideas","Understanding Elementary Shapes","Symmetry","Practical Geometry"],"Algebra":["Introduction to Algebra","Ratio & Proportion"],"Mensuration":["Perimeter & Area"],"Data Handling":["Data Handling"]},"Social Science":{"History":["What Where How and When","From Hunting to Farming","In the Earliest Cities","What Books and Burials Tell Us","Kingdoms Kings and Early Republic","New Questions and Ideas","Ashoka the Emperor","Vital Villages and Thriving Towns"],"Geography":["The Earth in the Solar System","Globe Latitudes and Longitudes","Motions of the Earth","Maps","Major Domains of the Earth","Our Country India"],"Civics":["Understanding Diversity","Unity in Diversity","What is Government","Key Elements of Democratic Government","Panchayati Raj","Rural Administration","Urban Administration","Rural Livelihoods","Urban Livelihoods"]},"English":{"Reading":["Comprehension Passages","Poetry Appreciation","Reading for Information"],"Writing":["Paragraph Writing","Letter Writing","Notice Writing","Diary Entry"],"Grammar":["Nouns","Pronouns","Verbs","Adjectives","Adverbs","Tenses","Prepositions","Conjunctions"],"Literature":["A Pact with the Sun - Prose","A Pact with the Sun - Poems"]},"Hindi":{"गद्य":["वसंत भाग 1 - कहानी","वसंत भाग 1 - निबंध","दुर्वा भाग 1"],"व्याकरण":["संज्ञा","सर्वनाम","क्रिया","विशेषण","काल","वाक्य भेद","मुहावरे"],"रचना":["निबंध लेखन","पत्र लेखन","अनुच्छेद लेखन"]},"Computer Science":{"Basics":["Introduction to Computers","Parts of Computer","Input Output Devices","Memory & Storage"],"Software":["Operating System","MS Word","MS Excel","MS PowerPoint"],"Internet":["Introduction to Internet","Email","Web Browsing","Digital Safety"]}},
-"Class 7":{"Science":{"Nutrition":["Nutrition in Plants","Nutrition in Animals"],"Heat & Temperature":["Heat","Acids Bases & Salts"],"Physical & Chemical Changes":["Physical & Chemical Changes","Weather Climate & Adaptations"],"Winds & Water":["Winds Storms & Cyclones","Water"],"Living World":["Transportation in Animals & Plants","Reproduction in Plants","Motion & Time","Electric Current"],"Light":["Light","Forests Our Lifeline","Wastewater Story"]},"Mathematics":{"Number System":["Integers","Fractions & Decimals","Rational Numbers"],"Algebra":["Simple Equations","Exponents & Powers"],"Geometry":["Lines & Angles","Triangles","Congruence of Triangles","Symmetry","Visualising Solid Shapes"],"Ratio & Proportion":["Ratio & Proportion","Percentage","Profit & Loss","Simple Interest"],"Data Handling":["Data Handling","Probability"]},"Social Science":{"History":["Tracing Changes Through 1000 Years","New Kings and Kingdoms","Delhi Sultans","The Mughal Empire","Rulers and Buildings","Towns Traders and Craftspersons","Tribes Nomads and Settled Communities","Devotional Paths to the Divine","The Making of Regional Cultures","18th Century Political Formations"],"Geography":["Environment","Inside Our Earth","Our Changing Earth","Air","Water","Natural Vegetation and Wildlife","Human Environment"],"Civics":["On Equality","Role of the Government in Health","How the State Government Works","Growing up as Boys and Girls","Women Change the World","Understanding Media","Understanding Advertising","Markets Around Us","A Shirt in the Market"]},"English":{"Reading":["Comprehension","Poetry","Reading Skills"],"Writing":["Essay Writing","Letter Writing","Story Writing","Report Writing"],"Grammar":["Parts of Speech","Tenses","Voice","Narration","Clauses","Punctuation"],"Literature":["Honeycomb Prose","Honeycomb Poems","An Alien Hand Supplementary"]},"Hindi":{"गद्य":["वसंत भाग 2","दुर्वा भाग 2","बाल महाभारत"],"व्याकरण":["शब्द विचार","संधि","समास","अलंकार","रस","छंद"],"रचना":["निबंध","पत्र","संवाद लेखन","सारांश"]},"Computer Science":{"Programming":["Introduction to Scratch","Basic Algorithms","Flowcharts"],"Applications":["Advanced MS Office","Spreadsheets","Presentations"],"Internet":["Search Engines","Online Safety","Digital Footprint","Cyberbullying"]}},
-"Class 8":{"Science":{"Crop Production":["Crop Production & Management","Microorganisms"],"Materials":["Synthetic Fibres & Plastics","Metals & Non-Metals","Coal & Petroleum","Combustion & Flame"],"Living World":["Conservation of Plants & Animals","Cell Structure & Functions","Reproduction in Animals"],"Force & Pressure":["Force & Pressure","Friction","Sound","Chemical Effects of Electric Current"],"Natural Phenomena":["Some Natural Phenomena","Light","Stars & Solar System","Pollution of Air & Water"]},"Mathematics":{"Number System":["Rational Numbers","Squares & Square Roots","Cubes & Cube Roots","Exponents & Powers","Playing with Numbers"],"Algebra":["Algebraic Expressions","Linear Equations","Factorisation","Introduction to Graphs"],"Geometry":["Understanding Quadrilaterals","Practical Geometry","Visualising Solid Shapes","Mensuration"],"Data Handling":["Data Handling","Probability","Direct & Inverse Proportions","Comparing Quantities"]},"Social Science":{"History":["How When and Where","From Trade to Territory","Ruling the Countryside","Tribals Dikus and the Vision of a Golden Age","When People Rebel","Weavers Iron Smelters and Factory Owners","Civilising the Native Educating the Nation","Women Caste and Reform","The Making of the National Movement","India After Independence"],"Geography":["Resources","Land Soil Water Natural Vegetation and Wildlife","Mineral and Power Resources","Agriculture","Industries","Human Resources"],"Civics":["The Indian Constitution","Understanding Secularism","Parliament and the Making of Laws","Judiciary","Understanding Marginalisation","Confronting Marginalisation","Public Facilities","Law and Social Justice"]},"English":{"Reading":["Comprehension Passages","Poetry Analysis","Skimming & Scanning"],"Writing":["Formal Letters","Informal Letters","Article Writing","Speech Writing"],"Grammar":["Active Passive Voice","Direct Indirect Speech","Modals","Conditionals","Relative Clauses"],"Literature":["Honeydew Prose","Honeydew Poems","It So Happened Supplementary"]},"Hindi":{"गद्य":["वसंत भाग 3","दुर्वा भाग 3","भारत की खोज"],"व्याकरण":["उपसर्ग प्रत्यय","समास","मुहावरे लोकोक्तियाँ","अलंकार","रस"],"रचना":["औपचारिक पत्र","अनौपचारिक पत्र","निबंध","विज्ञापन"]},"Computer Science":{"Programming":["Introduction to Python","Variables & Data Types","Conditionals","Loops"],"Applications":["Database Concepts","HTML Basics","Cyber Security"],"Networking":["Types of Networks","Internet Protocols","Cloud Computing Basics"]}},
-"Class 9":{"Science":{"Matter":["Matter in Our Surroundings","Is Matter Around Us Pure","Atoms & Molecules","Structure of Atom"],"Living World":["Cell The Fundamental Unit","Tissues","Diversity in Living Organisms","Why Do We Fall Ill"],"Motion & Force":["Motion","Force & Laws of Motion","Gravitation","Work & Energy","Sound"],"Natural Resources":["Natural Resources","Improvement in Food Resources"]},"Mathematics":{"Number System":["Number Systems"],"Algebra":["Polynomials","Linear Equations in Two Variables"],"Geometry":["Introduction to Euclid's Geometry","Lines & Angles","Triangles","Quadrilaterals","Areas of Parallelograms","Circles","Constructions"],"Mensuration":["Heron's Formula","Surface Areas & Volumes"],"Statistics & Probability":["Statistics","Probability"],"Coordinate Geometry":["Coordinate Geometry"]},"Social Science":{"History":["French Revolution","Socialism in Europe","Nazism & Rise of Hitler","Forest Society","Pastoralists","Peasants & Farmers","History & Sport","Clothing History"],"Geography":["India Size & Location","Physical Features","Drainage","Climate","Natural Vegetation","Population"],"Political Science":["What is Democracy","Constitutional Design","Electoral Politics","Working of Institutions","Democratic Rights"],"Economics":["Story of Palampur","People as Resource","Poverty as Challenge","Food Security"]},"English":{"Reading":["Unseen Passages","Note Making","Summary Writing"],"Writing":["Formal Letters","Article Writing","Story Writing","Diary Entry","Report Writing"],"Grammar":["Tenses","Modals","Subject Verb Agreement","Determiners","Reported Speech","Clauses"],"Literature":["Beehive Prose","Beehive Poems","Moments Supplementary"]},"Hindi":{"गद्य":["क्षितिज भाग 1","कृतिका भाग 1"],"व्याकरण":["अपठित गद्यांश","शब्द विचार","वाक्य भेद","अलंकार","समास","संधि"],"रचना":["निबंध","पत्र","संवाद","विज्ञापन","सूचना लेखन"]},"Computer Science":{"Programming":["Python Fundamentals","Data Types & Variables","Control Structures","Functions","Lists & Tuples"],"Computer Systems":["CPU & Memory","Storage Devices","Operating Systems","Boolean Logic"],"Cyber Safety":["Cyber Crimes","Online Safety","Intellectual Property","Privacy"]}},
-"Class 10":{"Science":{"Life Processes":["Nutrition","Respiration","Transportation","Excretion"],"Control & Coordination":["Nervous System","Hormones in Animals","Control in Plants"],"Reproduction":["Reproduction in Organisms","Human Reproductive System","Reproductive Health"],"Heredity & Evolution":["Heredity","Evolution","Speciation","Human Evolution"],"Chemical Reactions":["Chemical Reactions & Equations","Acids Bases & Salts","Metals & Non-Metals","Carbon Compounds","Periodic Classification"],"Natural Phenomena":["Light - Reflection","Light - Refraction","Human Eye","Electricity","Magnetic Effects of Current"],"Natural Resources":["Sources of Energy","Our Environment","Management of Natural Resources"]},"Mathematics":{"Number System":["Real Numbers"],"Algebra":["Polynomials","Pair of Linear Equations","Quadratic Equations","Arithmetic Progressions"],"Geometry":["Triangles","Circles","Constructions"],"Trigonometry":["Introduction to Trigonometry","Applications of Trigonometry"],"Mensuration":["Areas Related to Circles","Surface Areas & Volumes"],"Statistics & Probability":["Statistics","Probability"],"Coordinate Geometry":["Coordinate Geometry"]},"Social Science":{"History":["Nationalism in Europe","Nationalism in India","Age of Industrialisation","Print Culture","Novels Society & History"],"Geography":["Resources & Development","Forest & Wildlife","Water Resources","Agriculture","Minerals & Energy","Manufacturing Industries","Lifelines of National Economy"],"Political Science":["Power Sharing","Federalism","Gender Religion Caste","Political Parties","Outcomes of Democracy","Challenges to Democracy"],"Economics":["Development","Sectors of Indian Economy","Money & Credit","Globalisation","Consumer Rights"]},"English":{"Reading":["Unseen Passage Factual","Unseen Passage Discursive","Note Making & Summary"],"Writing":["Formal Letter","Article Writing","Speech Writing","Debate Writing","Report Writing","Story Writing"],"Grammar":["Gap Filling","Editing & Omission","Sentence Reordering","Sentence Transformation"],"Literature":["First Flight Prose","First Flight Poems","Footprints Without Feet Supplementary"]},"Hindi":{"गद्य":["क्षितिज भाग 2","कृतिका भाग 2"],"व्याकरण":["अपठित गद्यांश","अपठित काव्यांश","व्याकरण बोध"],"रचना":["निबंध लेखन","पत्र लेखन","सूचना लेखन","विज्ञापन लेखन"]},"Computer Science":{"Programming":["Python Revision","Working with Functions","File Handling","Exception Handling"],"Database":["Introduction to MySQL","SQL Commands DDL DML","Queries","Joins"],"Networking":["Network Concepts","Network Devices","Network Topologies","Internet Services"]}},
-"Class 11":{"Physics":{"Mechanics":["Physical World","Units & Measurements","Motion in Straight Line","Motion in Plane","Laws of Motion","Work Energy Power","System of Particles","Gravitation"],"Properties of Matter":["Mechanical Properties of Solids","Mechanical Properties of Fluids","Thermal Properties","Thermodynamics","Kinetic Theory"],"Waves":["Oscillations","Waves"]},"Chemistry":{"Physical Chemistry":["Some Basic Concepts","Structure of Atom","Classification of Elements","Chemical Bonding","States of Matter","Thermodynamics","Equilibrium","Redox Reactions"],"Inorganic Chemistry":["Hydrogen","s-Block Elements","p-Block Elements"],"Organic Chemistry":["Organic Chemistry Basic","Hydrocarbons","Environmental Chemistry"]},"Biology":{"Diversity":["Living World","Biological Classification","Plant Kingdom","Animal Kingdom"],"Structural Organisation":["Morphology of Plants","Anatomy of Plants","Structural Organisation in Animals"],"Cell Biology":["Cell The Unit of Life","Biomolecules","Cell Cycle & Division"],"Plant Physiology":["Transport in Plants","Mineral Nutrition","Photosynthesis","Respiration in Plants","Plant Growth"],"Human Physiology":["Digestion & Absorption","Breathing & Exchange","Body Fluids & Circulation","Excretory Products","Locomotion & Movement","Neural Control","Chemical Coordination"]},"Mathematics":{"Sets & Functions":["Sets","Relations & Functions","Trigonometric Functions"],"Algebra":["Complex Numbers","Linear Inequalities","Permutations & Combinations","Binomial Theorem","Sequences & Series"],"Coordinate Geometry":["Straight Lines","Conic Sections","Introduction to 3D Geometry"],"Calculus":["Limits & Derivatives"],"Statistics & Probability":["Statistics","Probability"]},"English":{"Reading":["Unseen Passages","Note Making","Summary"],"Writing":["Notice","Advertisement","Business Letter","Report","Article","Speech","Debate"],"Grammar":["Advanced Grammar","Sentence Transformation","Error Correction"],"Literature":["Hornbill Prose","Hornbill Poems","Snapshots Supplementary"]},"Hindi":{"गद्य":["आरोह भाग 1","वितान भाग 1"],"व्याकरण":["अपठित बोध","कार्यालयी हिंदी","काव्यबोध"],"रचना":["निबंध","पत्र","प्रतिवेदन","विज्ञापन"]},"Computer Science":{"Programming":["Python Basics","pandas","Matplotlib","File Handling"],"Database":["MySQL Basics","SQL Queries","Python-MySQL Connectivity"],"Networking":["Network Concepts","Security Concepts","Open Source Software"]}},
-"Class 12":{"Physics":{"Electromagnetism":["Electric Charges & Fields","Electrostatic Potential","Current Electricity","Moving Charges","Magnetism","Electromagnetic Induction","AC Circuits","EM Waves"],"Optics":["Ray Optics","Wave Optics"],"Modern Physics":["Dual Nature","Atoms","Nuclei","Semiconductors","Communication Systems"]},"Chemistry":{"Physical Chemistry":["Solid State","Solutions","Electrochemistry","Chemical Kinetics","Surface Chemistry"],"Inorganic Chemistry":["General Principles","p-Block Elements","d & f Block","Coordination Compounds"],"Organic Chemistry":["Haloalkanes & Haloarenes","Alcohols Phenols Ethers","Aldehydes Ketones Acids","Amines","Biomolecules","Polymers","Chemistry in Everyday Life"]},"Biology":{"Reproduction":["Reproduction in Organisms","Sexual Reproduction in Plants","Human Reproduction","Reproductive Health"],"Genetics & Evolution":["Inheritance & Variation","Molecular Basis of Inheritance","Evolution"],"Biology in Human Welfare":["Human Health & Disease","Strategies for Food Production","Microbes in Human Welfare"],"Biotechnology":["Biotechnology Principles","Biotechnology Applications"],"Ecology":["Organisms & Populations","Ecosystem","Biodiversity","Environmental Issues"]},"Mathematics":{"Relations & Functions":["Relations & Functions","Inverse Trigonometric Functions"],"Algebra":["Matrices","Determinants"],"Calculus":["Continuity & Differentiability","Applications of Derivatives","Integrals","Applications of Integrals","Differential Equations"],"Vectors & 3D":["Vector Algebra","Three Dimensional Geometry"],"Linear Programming":["Linear Programming"],"Probability":["Probability"]},"English":{"Reading":["Unseen Passages","Note Making & Summary"],"Writing":["Notice","Advertisement","Business Letter","Report","Article","Speech"],"Grammar":["Error Correction","Gap Filling","Sentence Transformation"],"Literature":["Flamingo Prose","Flamingo Poems","Vistas Supplementary"]},"Hindi":{"गद्य":["आरोह भाग 2","वितान भाग 2"],"व्याकरण":["अपठित बोध","कार्यालयी हिंदी","व्याकरण"],"रचना":["निबंध","पत्र","प्रतिवेदन"]},"Computer Science":{"Programming":["Python Advanced","Pandas Advanced","Data Visualization","File Handling Advanced"],"Database":["MySQL Advanced","Views & Stored Procedures","Python-MySQL Advanced"],"Networking":["Internet Basics","Network Security","Open Source Concepts","Societal Impact"]}},
-"JEE Mains":{"Physics":{"Mechanics":["Kinematics","Laws of Motion","Work Energy Power","Rotational Motion","Gravitation","Properties of Matter"],"Thermodynamics":["Thermal Properties","Laws of Thermodynamics","Kinetic Theory of Gases","Heat Transfer"],"Waves & Optics":["Oscillations","Waves","Ray Optics","Wave Optics"],"Electromagnetism":["Electrostatics","Current Electricity","Magnetic Effects","Electromagnetic Induction","AC Circuits","EM Waves"],"Modern Physics":["Dual Nature of Radiation","Atoms & Nuclei","Semiconductors","Communication Systems"]},"Chemistry":{"Physical Chemistry":["Mole Concept","Atomic Structure","Chemical Bonding","States of Matter","Thermodynamics","Equilibrium","Electrochemistry","Chemical Kinetics","Surface Chemistry"],"Inorganic Chemistry":["Periodic Table","s-Block Elements","p-Block Elements","d & f Block Elements","Coordination Compounds","Metallurgy","Environmental Chemistry"],"Organic Chemistry":["Basic Concepts","Hydrocarbons","Haloalkanes","Alcohols & Ethers","Aldehydes & Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"]},"Mathematics":{"Algebra":["Sets & Relations","Complex Numbers","Sequences & Series","Permutations & Combinations","Binomial Theorem","Matrices & Determinants","Probability"],"Calculus":["Limits & Continuity","Differentiation","Applications of Derivatives","Integration","Definite Integrals","Differential Equations"],"Coordinate Geometry":["Straight Lines","Circles","Parabola","Ellipse","Hyperbola","3D Geometry"],"Trigonometry":["Trigonometric Functions","Inverse Trigonometry","Properties of Triangles"]}},
-"NEET":{"Physics":{"Mechanics":["Kinematics","Laws of Motion","Work Energy Power","Rotational Motion","Gravitation"],"Thermodynamics":["Thermal Properties","Laws of Thermodynamics","Kinetic Theory"],"Waves & Optics":["Oscillations","Waves","Ray Optics","Wave Optics"],"Electromagnetism":["Electrostatics","Current Electricity","Magnetic Effects","EM Induction"],"Modern Physics":["Dual Nature","Atoms & Nuclei","Semiconductors"]},"Chemistry":{"Physical Chemistry":["Mole Concept","Atomic Structure","Chemical Bonding","Thermodynamics","Equilibrium","Electrochemistry","Chemical Kinetics"],"Inorganic Chemistry":["Periodic Table","s-Block","p-Block","d-Block","Coordination Compounds","Metallurgy"],"Organic Chemistry":["Basic Concepts","Hydrocarbons","Haloalkanes","Alcohols","Aldehydes & Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"]},"Biology":{"Botany":["Cell Biology","Plant Morphology","Plant Physiology","Reproduction in Plants","Genetics","Evolution","Ecology"],"Zoology":["Animal Kingdom","Human Physiology","Animal Reproduction","Human Reproduction","Genetics & Evolution","Biology in Human Welfare","Biotechnology","Ecology"]}}
+
+"Class 10":{
+  "Science":{
+    "Life Processes":["Nutrition","Respiration","Transportation","Excretion"],
+    "Control & Coordination":["Nervous System","Hormones in Animals","Control in Plants"],
+    "Reproduction":["Reproduction in Organisms","Human Reproductive System","Reproductive Health"],
+    "Heredity & Evolution":["Heredity","Evolution","Speciation"],
+    "Chemical Reactions":["Chemical Reactions & Equations","Acids Bases & Salts","Metals & Non-Metals","Carbon Compounds","Periodic Classification"],
+    "Natural Phenomena":["Light – Reflection","Light – Refraction","Human Eye","Electricity","Magnetic Effects of Current"],
+    "Natural Resources":["Sources of Energy","Our Environment","Management of Natural Resources"]
+  },
+  "Mathematics":{
+    "Number System":["Real Numbers"],
+    "Algebra":["Polynomials","Pair of Linear Equations in Two Variables","Quadratic Equations","Arithmetic Progressions"],
+    "Geometry":["Triangles","Circles","Constructions"],
+    "Trigonometry":["Introduction to Trigonometry","Applications of Trigonometry"],
+    "Mensuration":["Areas Related to Circles","Surface Areas & Volumes"],
+    "Statistics & Probability":["Statistics","Probability"],
+    "Coordinate Geometry":["Coordinate Geometry"]
+  },
+  "Social Science":{
+    "History":["Nationalism in Europe","Nationalism in India","Age of Industrialisation","Print Culture and the Modern World","Novels Society & History"],
+    "Geography":["Resources & Development","Forest & Wildlife Resources","Water Resources","Agriculture","Minerals & Energy Resources","Manufacturing Industries","Lifelines of National Economy"],
+    "Political Science":["Power Sharing","Federalism","Gender Religion & Caste","Political Parties","Outcomes of Democracy","Challenges to Democracy"],
+    "Economics":["Development","Sectors of the Indian Economy","Money & Credit","Globalisation and the Indian Economy","Consumer Rights"]
+  },
+  "English":{
+    "Reading":["Unseen Passage – Factual","Unseen Passage – Discursive","Note Making & Summary"],
+    "Writing":["Formal Letter","Article Writing","Analytical Paragraph","Story Writing"],
+    "Grammar":["Tenses","Modals","Subject–Verb Concord","Determiners","Reported Speech","Clauses","Editing & Omission","Sentence Reordering"],
+    "First Flight – Prose":["A Letter to God","Nelson Mandela: Long Walk to Freedom","Two Stories about Flying","From the Diary of Anne Frank","The Hundred Dresses I & II","Glimpses of India","Mijbil the Otter","Madam Rides the Bus","The Sermon at Benares","The Proposal"],
+    "First Flight – Poetry":["Dust of Snow","Fire and Ice","A Tiger in the Zoo","How to Tell Wild Animals","The Ball Poem","Amanda!","Animals","The Trees","Fog","The Tale of Custard the Dragon","For Anne Gregory"],
+    "Footprints Without Feet":["A Triumph of Surgery","The Thief's Story","The Midnight Visitor","A Question of Trust","Footprints without Feet","The Making of a Scientist","The Necklace","Bholi","The Book That Saved the Earth","Patol Babu Film Star"]
+  },
+  "Hindi":{
+    "क्षितिज भाग 2 – गद्य":["नेताजी का चश्मा","बालगोबिन भगत","लखनवी अंदाज़","मानवीय करुणा की दिव्य चमक","एक कहानी यह भी","स्त्री शिक्षा के विरोधी कुतर्कों का खंडन","नमक का दारोगा","संस्कृति"],
+    "क्षितिज भाग 2 – काव्य":["पद (सूरदास)","राम-लक्ष्मण-परशुराम संवाद","सवैया एवं कवित्त","आत्मकथ्य","उत्साह एवं अट नहीं रही","यह दंतुरहित मुस्कान एवं फसल","छाया मत छूना","कर चले हम फ़िदा","आत्मत्राण"],
+    "कृतिका भाग 2":["माता का अँचल","जॉर्ज पंचम की नाक","साना-साना हाथ जोड़ि","एही ठैयाँ झुलनी हेरानी हो रामा","मैं क्यों लिखता हूँ"],
+    "व्याकरण":["पद परिचय","रचना के आधार पर वाक्य भेद","वाक्य संश्लेषण","समास","मुहावरे","अलंकार"],
+    "रचना":["पत्र लेखन","अनुच्छेद लेखन","विज्ञापन लेखन","संवाद लेखन"]
+  },
+  "Marathi":{
+    "गद्य":["कथा – आकलन व रसग्रहण","ललित निबंध","व्यक्तिचित्रण","प्रवासवर्णन"],
+    "पद्य":["कविता – रसग्रहण","कवितेतील अलंकार व वृत्त"],
+    "व्याकरण":["शब्दभेद","समास","अलंकार","वाक्यरूपांतर","वाक्यशुद्धी"],
+    "उपयोजित लेखन":["पत्रलेखन","निबंधलेखन","संवादलेखन","जाहिरात लेखन","अहवाल लेखन"]
+  },
+  "Computer Applications":{
+    "Programming":["Python Revision","Working with Functions","File Handling","Exception Handling"],
+    "Database":["Introduction to MySQL","SQL Commands – DDL & DML","Queries","Joins"],
+    "Networking":["Network Concepts","Network Devices","Network Topologies","Internet Services"],
+    "Society Law & Ethics":["Digital Footprint","Netiquettes","Data Protection","Cyber Crime","IT Act","Technology & Society"]
+  }
+},
+
+"Class 11":{
+  "Physics":{
+    "Mechanics":["Physical World","Units & Measurements","Motion in a Straight Line","Motion in a Plane","Laws of Motion","Work Energy Power","System of Particles & Rotational Motion","Gravitation"],
+    "Properties of Matter":["Mechanical Properties of Solids","Mechanical Properties of Fluids","Thermal Properties of Matter","Thermodynamics","Kinetic Theory"],
+    "Waves":["Oscillations","Waves"]
+  },
+  "Chemistry":{
+    "Physical Chemistry":["Some Basic Concepts of Chemistry","Structure of Atom","Classification of Elements & Periodicity","Chemical Bonding & Molecular Structure","States of Matter","Thermodynamics","Equilibrium","Redox Reactions"],
+    "Inorganic Chemistry":["Hydrogen","s-Block Elements","p-Block Elements"],
+    "Organic Chemistry":["Organic Chemistry – Basic Principles","Hydrocarbons","Environmental Chemistry"]
+  },
+  "Biology":{
+    "Diversity in Living World":["The Living World","Biological Classification","Plant Kingdom","Animal Kingdom"],
+    "Structural Organisation":["Morphology of Flowering Plants","Anatomy of Flowering Plants","Structural Organisation in Animals"],
+    "Cell Biology":["Cell – The Unit of Life","Biomolecules","Cell Cycle & Cell Division"],
+    "Plant Physiology":["Transport in Plants","Mineral Nutrition","Photosynthesis in Higher Plants","Respiration in Plants","Plant Growth & Development"],
+    "Human Physiology":["Digestion & Absorption","Breathing & Exchange of Gases","Body Fluids & Circulation","Excretory Products & their Elimination","Locomotion & Movement","Neural Control & Coordination","Chemical Coordination & Integration"]
+  },
+  "Mathematics":{
+    "Sets & Functions":["Sets","Relations & Functions","Trigonometric Functions"],
+    "Algebra":["Complex Numbers & Quadratic Equations","Linear Inequalities","Permutations & Combinations","Binomial Theorem","Sequences & Series"],
+    "Coordinate Geometry":["Straight Lines","Conic Sections","Introduction to Three Dimensional Geometry"],
+    "Calculus":["Limits & Derivatives"],
+    "Statistics & Probability":["Statistics","Probability"]
+  },
+  "English":{
+    "Reading":["Unseen Passages","Note Making","Summary Writing"],
+    "Writing":["Notice","Formal Invitation & Reply","Business / Official Letter","Report Writing","Article Writing","Speech Writing","Debate Writing"],
+    "Grammar":["Tense & Modals","Determiners","Clauses","Sentence Transformation","Error Correction"],
+    "Hornbill – Prose":["The Portrait of a Lady","We're Not Afraid to Die… if We Can All Be Together","Discovering Tut: The Saga Continues","Landscape of the Soul","The Ailing Planet: the Green Movement's Role","The Browning Version","The Adventure","Silk Road"],
+    "Hornbill – Poetry":["A Photograph","The Laburnum Top","The Voice of the Rain","Childhood","Father to Son"],
+    "Snapshots – Supplementary":["The Summer of the Beautiful White Horse","The Address","Ranga's Marriage","Albert Einstein at School","Mother's Day","The Ghat of the Only World","Birth","The Tale of Melon City"]
+  },
+  "Hindi":{
+    "आरोह भाग 1 – गद्य":["भक्तिन","बाज़ार दर्शन","काले मेघा पानी दे","जामुन का पेड़","भारत माता"],
+    "आरोह भाग 1 – काव्य":["कबीर के पद","आत्मपरिचय","एक गीत","पद (मीरा)","तोड़ती पत्थर","उषा"],
+    "वितान भाग 1":["सिल्वर वैडिंग","जूझ"],
+    "व्याकरण":["शब्द शक्ति","रस","छंद","अलंकार","पदबंध"],
+    "रचना":["निबंध लेखन","पत्र लेखन","प्रतिवेदन लेखन"]
+  },
+  "Marathi":{
+    "गद्य":["ललित गद्य","वैचारिक गद्य","व्यक्तिचित्रणात्मक गद्य"],
+    "पद्य":["भावकविता","वैचारिक कविता"],
+    "व्याकरण":["शब्दसिद्धी","समास","अलंकार","वाक्यविचार"],
+    "उपयोजित लेखन":["निबंधलेखन","अहवाल लेखन","मुलाखत","भाषण"]
+  },
+  "Computer Science":{
+    "Programming":["Python Basics","pandas","Matplotlib","File Handling"],
+    "Database":["MySQL Basics","SQL Queries","Python–MySQL Connectivity"],
+    "Networking":["Network Concepts","Security Concepts","Open Source Software"]
+  },
+  "Accountancy":{
+    "Theory Base of Accounting":["Introduction to Accounting","Theory Base of Accounting","Recording of Transactions I","Recording of Transactions II"],
+    "Bank Reconciliation & Trial Balance":["Bank Reconciliation Statement","Trial Balance and Rectification of Errors"],
+    "Financial Statements":["Depreciation Provisions & Reserves","Bills of Exchange","Financial Statements I","Financial Statements II"],
+    "Computers in Accounting":["Computerised Accounting System","Accounting Information Systems","Spreadsheet for Accounting"]
+  },
+  "Business Studies":{
+    "Nature of Business":["Business Trade & Commerce","Forms of Business Organisation","Private Public & Global Enterprises","Business Services","Emerging Modes of Business"],
+    "Business Environment":["Social Responsibility of Business","Formation of a Company","Sources of Business Finance","Small Business","Internal Trade","International Business"]
+  },
+  "Economics":{
+    "Statistics for Economics":["Introduction","Collection of Data","Organisation of Data","Presentation of Data","Measures of Central Tendency","Measures of Dispersion","Correlation","Index Numbers"],
+    "Indian Economic Development":["Indian Economy on the Eve of Independence","Indian Economy 1950–1990","Liberalisation Privatisation & Globalisation","Poverty","Human Capital Formation","Rural Development","Employment","Infrastructure","Environment & Sustainable Development"]
+  },
+  "History":{
+    "Early Societies":["From the Beginning of Time","Writing and City Life"],
+    "Empires & Cultures":["An Empire Across Three Continents","The Central Islamic Lands","Nomadic Empires","The Three Orders","Changing Cultural Traditions","Confrontation of Cultures"],
+    "Modern World":["The Industrial Revolution","Displacing Indigenous Peoples","Paths to Modernisation"]
+  },
+  "Political Science":{
+    "Indian Constitution at Work":["Constitution – Why and How","Rights in the Indian Constitution","Election and Representation","Executive","Legislature","Judiciary","Federalism","Local Governments","Constitution as a Living Document"],
+    "Political Theory":["Political Theory – Introduction","Freedom","Equality","Social Justice","Rights","Citizenship","Nationalism","Secularism","Peace","Development"]
+  },
+  "Geography":{
+    "Fundamentals of Physical Geography":["Geography as a Discipline","Origin and Evolution of the Earth","Interior of the Earth","Landforms","Climate","Water (Oceans)","Life on Earth"],
+    "India – Physical Environment":["India – Location","Structure and Physiography","Drainage System","Climate","Natural Vegetation","Soils","Natural Hazards and Disasters"]
+  },
+  "Sociology":{
+    "Introducing Sociology":["Sociology and Society","Terms Concepts and their Use","Understanding Social Institutions","Culture and Socialisation","Doing Sociology"],
+    "Understanding Society":["Social Structure Stratification & Social Processes","Social Change and Social Order","Environment and Society","Introducing Western Sociologists"]
+  },
+  "Psychology":{
+    "Introduction & Basic Processes":["What is Psychology","Methods of Enquiry","Biological Bases of Behaviour","Human Development","Sensory Attentional & Perceptual Processes","Learning"],
+    "Higher Mental Processes":["Memory","Thinking","Motivation and Emotion"]
+  }
+},
+
+"Class 12":{
+  "Physics":{
+    "Electromagnetism":["Electric Charges & Fields","Electrostatic Potential & Capacitance","Current Electricity","Moving Charges & Magnetism","Magnetism & Matter","Electromagnetic Induction","Alternating Current","Electromagnetic Waves"],
+    "Optics":["Ray Optics & Optical Instruments","Wave Optics"],
+    "Modern Physics":["Dual Nature of Radiation & Matter","Atoms","Nuclei","Semiconductor Electronics","Communication Systems"]
+  },
+  "Chemistry":{
+    "Physical Chemistry":["Solid State","Solutions","Electrochemistry","Chemical Kinetics","Surface Chemistry"],
+    "Inorganic Chemistry":["General Principles of Metallurgy","p-Block Elements","d & f Block Elements","Coordination Compounds"],
+    "Organic Chemistry":["Haloalkanes & Haloarenes","Alcohols Phenols & Ethers","Aldehydes Ketones & Carboxylic Acids","Amines","Biomolecules","Polymers","Chemistry in Everyday Life"]
+  },
+  "Biology":{
+    "Reproduction":["Reproduction in Organisms","Sexual Reproduction in Flowering Plants","Human Reproduction","Reproductive Health"],
+    "Genetics & Evolution":["Principles of Inheritance & Variation","Molecular Basis of Inheritance","Evolution"],
+    "Biology & Human Welfare":["Human Health & Disease","Strategies for Enhancement in Food Production","Microbes in Human Welfare"],
+    "Biotechnology":["Biotechnology – Principles & Processes","Biotechnology & its Applications"],
+    "Ecology":["Organisms & Populations","Ecosystem","Biodiversity & Conservation","Environmental Issues"]
+  },
+  "Mathematics":{
+    "Relations & Functions":["Relations & Functions","Inverse Trigonometric Functions"],
+    "Algebra":["Matrices","Determinants"],
+    "Calculus":["Continuity & Differentiability","Applications of Derivatives","Integrals","Applications of Integrals","Differential Equations"],
+    "Vectors & 3D Geometry":["Vector Algebra","Three Dimensional Geometry"],
+    "Linear Programming":["Linear Programming"],
+    "Probability":["Probability"]
+  },
+  "English":{
+    "Reading":["Unseen Passages","Note Making & Summary"],
+    "Writing":["Notice","Advertisement","Business / Official Letter","Report Writing","Article Writing","Speech Writing"],
+    "Grammar":["Error Correction","Gap Filling","Sentence Transformation","Editing"],
+    "Flamingo – Prose":["The Last Lesson","Lost Spring","Deep Water","The Rattrap","Indigo","Poets and Pancakes","The Interview","Going Places"],
+    "Flamingo – Poetry":["My Mother at Sixty-six","An Elementary School Classroom in a Slum","Keeping Quiet","A Thing of Beauty","A Roadside Stand","Aunt Jennifer's Tigers"],
+    "Vistas – Supplementary":["The Third Level","The Tiger King","Journey to the End of the Earth","The Enemy","Should Wizard Hit Mommy","On the Face of It","Evans Tries an O-level","Memories of Childhood"]
+  },
+  "Hindi":{
+    "आरोह भाग 2 – गद्य":["अशोक के फूल","पहलवान की ढोलक","नमक","शिरीष के फूल"],
+    "आरोह भाग 2 – काव्य":["कवितावली","छोटा मेरा खेत","कैमरे में बंद अपाहिज","सहर्ष स्वीकारा है","उषा"],
+    "वितान भाग 2":["सिल्वर वैडिंग – विस्तार","बाज़ार दर्शन – विस्तार"],
+    "व्याकरण":["पदबंध","समास","अलंकार","रस"],
+    "रचना":["निबंध लेखन","पत्र लेखन","प्रतिवेदन लेखन","लघुकथा लेखन"]
+  },
+  "Marathi":{
+    "गद्य":["वैचारिक व ललित गद्य","आत्मकथनपर लेख"],
+    "पद्य":["काव्यसौंदर्य आस्वाद","अभिव्यक्ती कविता"],
+    "व्याकरण":["वाक्यपृथक्करण","समास","अलंकार","विरामचिन्हे"],
+    "उपयोजित लेखन":["निबंधलेखन","अहवाल लेखन","मुलाखत लेखन","जाहिरात लेखन"]
+  },
+  "Computer Science":{
+    "Programming":["Python Advanced","Pandas Advanced","Data Visualisation","File Handling Advanced"],
+    "Database":["MySQL Advanced","Views & Stored Procedures","Python–MySQL Advanced"],
+    "Networking":["Internet Basics","Network Security","Open Source Concepts","Societal Impact"]
+  },
+  "Accountancy":{
+    "Partnership Accounts":["Accounting for Partnership – Basic Concepts","Reconstitution – Admission of a Partner","Reconstitution – Retirement / Death of a Partner","Dissolution of Partnership Firm"],
+    "Company Accounts":["Accounting for Share Capital","Issue and Redemption of Debentures"],
+    "Financial Statement Analysis":["Financial Statements of a Company","Analysis of Financial Statements","Accounting Ratios","Cash Flow Statement"]
+  },
+  "Business Studies":{
+    "Principles & Environment of Management":["Nature and Significance of Management","Principles of Management","Business Environment","Planning"],
+    "Business Finance & Marketing":["Organising","Staffing","Directing","Controlling","Financial Management","Financial Markets","Marketing Management","Consumer Protection"]
+  },
+  "Economics":{
+    "Microeconomics":["Introduction to Microeconomics","Theory of Consumer Behaviour","Production and Costs","Theory of the Firm Under Perfect Competition","Market Equilibrium","Non-Competitive Markets"],
+    "Macroeconomics":["National Income Accounting","Money and Banking","Determination of Income & Employment","Government Budget and the Economy","Balance of Payments"]
+  },
+  "History":{
+    "Themes in Indian History I":["Bricks Beads & Bones – Harappan Civilisation","Kings Farmers & Towns","Kinship Caste & Class"],
+    "Themes in Indian History II":["Thinkers Beliefs & Buildings","Through the Eyes of Travellers","Bhakti-Sufi Traditions","An Imperial Capital – Vijayanagara","Peasants Zamindars & the State","Kings and Chronicles – the Mughal Courts"],
+    "Themes in Indian History III":["Colonialism and the Countryside","Rebels and the Raj – 1857","Colonial Cities","Mahatma Gandhi & the Nationalist Movement","Understanding Partition","Framing the Constitution"]
+  },
+  "Political Science":{
+    "Contemporary World Politics":["The Cold War Era","End of Bipolarity","US Hegemony in World Politics","Alternative Centres of Power","Contemporary South Asia","International Organisations","Security in the Contemporary World","Environment and Natural Resources","Globalisation"],
+    "Politics in India Since Independence":["Challenges of Nation Building","Era of One-Party Dominance","Politics of Planned Development","India's External Relations","Challenges to and Restoration of the Congress System","Crisis of the Democratic Order","Regional Aspirations","Recent Developments in Indian Politics"]
+  },
+  "Geography":{
+    "Human Geography":["Human Geography – Nature and Scope","World Population – Distribution Density & Growth","Population Composition","Human Development","Primary Activities","Secondary Activities","Tertiary and Quaternary Activities","Transport and Communication","International Trade","Human Settlements"],
+    "India – People and Economy":["Population – Distribution Density & Growth","Migration","Human Development in India","Human Settlements","Land Resources & Agriculture","Water Resources","Mineral & Energy Resources","Manufacturing Industries","Planning and Sustainable Development","Transport and Communication","Geographical Perspective on Selected Issues"]
+  },
+  "Sociology":{
+    "Indian Society":["Introducing Indian Society","Social Institutions – Continuity & Change","Demographic Structure of Indian Society","Diversity and Inequality","Social Change","Rural and Agrarian Transformation","Industrial Society"],
+    "Social Change and Development":["Structural Change","Cultural Change","The Story of Indian Democracy","Change & Development in Rural Society","Change & Development in Industrial Society","Globalisation and Social Change","Mass Media and Communications","Social Movements"]
+  },
+  "Psychology":{
+    "Individual Differences and Self":["Variations in Psychological Attributes","Self and Personality"],
+    "Disorders and Society":["Meeting Life Challenges","Psychological Disorders","Therapeutic Approaches","Attitude and Social Cognition","Social Influence & Group Processes","Developing Psychological Skills"]
+  }
+},
+
+"JEE Mains":{
+  "Physics":{"Mechanics":["Kinematics","Laws of Motion","Work Energy Power","Rotational Motion","Gravitation","Properties of Matter"],"Thermodynamics":["Thermal Properties","Laws of Thermodynamics","Kinetic Theory of Gases","Heat Transfer"],"Waves & Optics":["Oscillations","Waves","Ray Optics","Wave Optics"],"Electromagnetism":["Electrostatics","Current Electricity","Magnetic Effects","Electromagnetic Induction","AC Circuits","EM Waves"],"Modern Physics":["Dual Nature of Radiation","Atoms & Nuclei","Semiconductors","Communication Systems"]},
+  "Chemistry":{"Physical Chemistry":["Mole Concept","Atomic Structure","Chemical Bonding","States of Matter","Thermodynamics","Equilibrium","Electrochemistry","Chemical Kinetics","Surface Chemistry"],"Inorganic Chemistry":["Periodic Table","s-Block Elements","p-Block Elements","d & f Block Elements","Coordination Compounds","Metallurgy","Environmental Chemistry"],"Organic Chemistry":["Basic Concepts","Hydrocarbons","Haloalkanes","Alcohols & Ethers","Aldehydes & Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"]},
+  "Mathematics":{"Algebra":["Sets & Relations","Complex Numbers","Sequences & Series","Permutations & Combinations","Binomial Theorem","Matrices & Determinants","Probability"],"Calculus":["Limits & Continuity","Differentiation","Applications of Derivatives","Integration","Definite Integrals","Differential Equations"],"Coordinate Geometry":["Straight Lines","Circles","Parabola","Ellipse","Hyperbola","3D Geometry"],"Trigonometry":["Trigonometric Functions","Inverse Trigonometry","Properties of Triangles"]}
+},
+
+"NEET":{
+  "Physics":{"Mechanics":["Kinematics","Laws of Motion","Work Energy Power","Rotational Motion","Gravitation"],"Thermodynamics":["Thermal Properties","Laws of Thermodynamics","Kinetic Theory"],"Waves & Optics":["Oscillations","Waves","Ray Optics","Wave Optics"],"Electromagnetism":["Electrostatics","Current Electricity","Magnetic Effects","EM Induction"],"Modern Physics":["Dual Nature","Atoms & Nuclei","Semiconductors"]},
+  "Chemistry":{"Physical Chemistry":["Mole Concept","Atomic Structure","Chemical Bonding","Thermodynamics","Equilibrium","Electrochemistry","Chemical Kinetics"],"Inorganic Chemistry":["Periodic Table","s-Block","p-Block","d-Block","Coordination Compounds","Metallurgy"],"Organic Chemistry":["Basic Concepts","Hydrocarbons","Haloalkanes","Alcohols","Aldehydes & Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"]},
+  "Biology":{"Botany":["Cell Biology","Plant Morphology","Plant Physiology","Reproduction in Plants","Genetics","Evolution","Ecology"],"Zoology":["Animal Kingdom","Human Physiology","Animal Reproduction","Human Reproduction","Genetics & Evolution","Biology in Human Welfare","Biotechnology","Ecology"]}
+}
 };
+
+// ============================================================
+// Subject-aware question types — kept in sync with subject choice
+// ============================================================
+function getQuestionTypes(subject){
+  const s=(subject||'').trim().toLowerCase();
+  const langs=['english','hindi','marathi'];
+  const numericHeavy=['mathematics'];
+  const sciences=['physics','chemistry'];
+  if(numericHeavy.includes(s)||sciences.includes(s)){
+    return ['MCQ','Assertion–Reason','Very Short Answer','Short Answer','Long Answer','Numerical / Problem-Solving','Case-Based','Mixed (All Types)'];
+  }
+  if(s==='biology'){
+    return ['MCQ','Assertion–Reason','Very Short Answer','Short Answer','Long Answer','Diagram-Based','Case-Based','Mixed (All Types)'];
+  }
+  if(langs.includes(s)){
+    return ['MCQ','Passage / Comprehension-Based','Grammar-Based','Very Short Answer','Short Answer','Long Answer / Essay','Literary / Extract-Based','Letter / Application Writing','Mixed (All Types)'];
+  }
+  if(s==='social science'){
+    return ['MCQ','Assertion–Reason','Source-Based','Map-Based','Very Short Answer','Short Answer','Long Answer','Mixed (All Types)'];
+  }
+  if(['history','political science','sociology'].includes(s)){
+    return ['MCQ','Assertion–Reason','Source-Based','Very Short Answer','Short Answer','Long Answer','Mixed (All Types)'];
+  }
+  if(s==='geography'){
+    return ['MCQ','Assertion–Reason','Map-Based','Very Short Answer','Short Answer','Long Answer','Mixed (All Types)'];
+  }
+  if(s==='psychology'){
+    return ['MCQ','Assertion–Reason','Case-Based','Very Short Answer','Short Answer','Long Answer','Mixed (All Types)'];
+  }
+  if(s==='accountancy'){
+    return ['MCQ','Numerical / Problem-Solving','Very Short Answer','Short Answer','Long Answer','Case-Based','Mixed (All Types)'];
+  }
+  if(s==='economics'){
+    return ['MCQ','Numerical / Problem-Solving','Assertion–Reason','Very Short Answer','Short Answer','Long Answer','Case-Based','Mixed (All Types)'];
+  }
+  if(s==='business studies'){
+    return ['MCQ','Assertion–Reason','Case-Based','Very Short Answer','Short Answer','Long Answer','Mixed (All Types)'];
+  }
+  if(s==='computer science'||s==='computer applications'){
+    return ['MCQ','Assertion–Reason','Programming / Code-Based','Very Short Answer','Short Answer','Long Answer','Case-Based','Mixed (All Types)'];
+  }
+  return ['MCQ','Assertion–Reason','Very Short Answer','Short Answer','Long Answer','Mixed (All Types)'];
+}
 
 function toTitle(s){return s.trim().replace(/\w\S*/g,t=>t.charAt(0).toUpperCase()+t.substr(1).toLowerCase());}
 function calcTime(n,d){return Math.ceil(n*2*(d==='Easy'?0.8:d==='Hard'?1.2:1.0));}
+function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((e||'').trim());}
 
 function parseTest(raw){
   let c=raw.replace(/^=\s*/,'').trim();
@@ -255,7 +547,6 @@ function DownloadIcon(){
 }
 
 // Shared component: View / Download buttons for a generated Google Doc.
-// Renders disabled (non-throwing) buttons if docId is missing.
 function DocActionButtons({docId,downloadName}){
   const viewUrl=buildViewUrl(docId);
   const downloadUrl=buildDownloadUrl(docId);
@@ -342,6 +633,7 @@ function App(){
   const [subject,setSubject]=useState('');
   const [chapters,setChapters]=useState([]);
   const [topics,setTopics]=useState([]);
+  const [qTypes,setQTypes]=useState([]);
   const [difficulty,setDifficulty]=useState('');
   const [numQ,setNumQ]=useState('');
   const [mode,setMode]=useState('ai_only');
@@ -350,9 +642,10 @@ function App(){
   const [maxMarks,setMaxMarks]=useState('');
   const [teacherId,setTeacherId]=useState('');
   const [loading,setLoading]=useState(false);
+  const [elapsedSec,setElapsedSec]=useState(0);
   const [error,setError]=useState('');
-  const [result,setResult]=useState(null);       // online: parsed text result
-  const [offlineDocs,setOfflineDocs]=useState(null); // offline: {questionDocumentId, keyDocumentId}
+  const [result,setResult]=useState(null);
+  const [offlineDocs,setOfflineDocs]=useState(null);
   const [meta,setMeta]=useState(null);
   const [activeTab,setActiveTab]=useState('questions');
   const [formLoading,setFormLoading]=useState(false);
@@ -363,14 +656,33 @@ function App(){
   const subjects=examType?Object.keys(SYLLABUS[examType]||{}):[];
   const chapterOpts=(examType&&subject)?Object.keys(SYLLABUS[examType]?.[subject]||{}):[];
   const topicOpts=chapters.flatMap(ch=>SYLLABUS[examType]?.[subject]?.[ch]||[]);
+  const qTypeOpts=subject?getQuestionTypes(subject):[];
   const suggestedTime=(numQ&&difficulty&&difficulty!=='Mixed')?calcTime(parseInt(numQ),difficulty):null;
 
   useEffect(()=>{if(suggestedTime)setTimeLimit(String(suggestedTime));},[numQ,difficulty]);
-  useEffect(()=>{setSubject('');setChapters([]);setTopics([]);},[examType]);
-  useEffect(()=>{setChapters([]);setTopics([]);},[subject]);
+  useEffect(()=>{setSubject('');setChapters([]);setTopics([]);setQTypes([]);},[examType]);
+  useEffect(()=>{setChapters([]);setTopics([]);setQTypes([]);},[subject]);
   useEffect(()=>{setTopics([]);},[chapters]);
 
-  // When switching test type, reset result/error state and return to configuration
+  // Elapsed-time ticker while a generation request is in flight — drives the
+  // "still working" loader messaging below.
+  useEffect(()=>{
+    if(!loading){setElapsedSec(0);return;}
+    const iv=setInterval(()=>setElapsedSec(s=>s+1),1000);
+    return()=>clearInterval(iv);
+  },[loading]);
+
+  function loaderMessage(){
+    if(elapsedSec<20)return'AI IS WRITING YOUR QUESTIONS';
+    if(elapsedSec<60)return'STILL GENERATING — LARGER PAPERS TAKE LONGER';
+    if(elapsedSec<180)return'ALMOST THERE — HIGH-MARK PAPERS CAN TAKE A FEW MINUTES';
+    return'STILL WORKING — THIS CAN TAKE UP TO '+Math.round(GENERATION_TIMEOUT_MS/60000)+' MIN FOR LARGE PAPERS';
+  }
+  function formatElapsed(s){
+    const m=Math.floor(s/60),r=s%60;
+    return m>0?(m+'m '+r+'s'):(r+'s');
+  }
+
   function switchTestType(tt){
     if(tt===testType)return;
     setTestType(tt);
@@ -383,10 +695,26 @@ function App(){
     setStep(1);
   }
 
+  // "Mixed (All Types)" is exclusive — picking it clears other selections and vice versa
+  function handleQTypeChange(next){
+    const hadMixed=qTypes.includes('Mixed (All Types)');
+    const hasMixed=next.includes('Mixed (All Types)');
+    if(hasMixed&&!hadMixed){setQTypes(['Mixed (All Types)']);return;}
+    if(hasMixed&&hadMixed&&next.length>1){setQTypes(next.filter(t=>t!=='Mixed (All Types)'));return;}
+    setQTypes(next);
+  }
+
   async function generate(){
-    // Validate shared fields
-    if(!examType||!subject||chapters.length===0||topics.length===0){
-      setError('Please fill in all required fields.');
+    if(!examType||!subject||chapters.length===0||topics.length===0||qTypes.length===0){
+      setError('Please fill in all required fields, including question type.');
+      return;
+    }
+    if(!email.trim()){
+      setError('Teacher email is required.');
+      return;
+    }
+    if(!isValidEmail(email)){
+      setError('Please enter a valid email address.');
       return;
     }
     if(testType==='online'){
@@ -404,6 +732,7 @@ function App(){
         exam_type:examType,
         subject:toTitle(subject),
         chapters,topics,
+        question_types:qTypes,
         difficulty,
         num_questions:parseInt(numQ),
         mode,
@@ -416,22 +745,24 @@ function App(){
         exam_type:examType,
         subject:toTitle(subject),
         chapters,topics,
+        question_types:qTypes,
         difficulty,
         maximum_marks:parseInt(maxMarks),
-        teacher_id:teacherId.trim()
+        teacher_id:teacherId.trim(),
+        teacher_email:email.trim().toLowerCase()
       };
     }
 
+    const controller=new AbortController();
+    const timeoutId=setTimeout(()=>controller.abort(),GENERATION_TIMEOUT_MS);
+
     try{
-      const res=await fetch(W1,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const res=await fetch(W1,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
+      clearTimeout(timeoutId);
       const raw=await res.text();
       if(!raw||!raw.trim())throw new Error('Empty response from server (status '+res.status+')');
 
       if(testType==='offline'){
-        // Backend contract: { success, questionDocumentId, keyDocumentId, message }
-        // (n8n sometimes prefixes string outputs with '=' — same quirk already handled
-        // for form_link below — and may return the object wrapped in an array). Strip
-        // that before parsing.
         let cleaned=raw.trim().replace(/^=+/,'').trim();
         let json;
         try{
@@ -439,7 +770,6 @@ function App(){
         }catch(e){
           throw new Error('Unexpected response from server.');
         }
-        // Defend against a double-encoded response (a JSON string containing the real JSON).
         if(typeof json==='string'){
           try{ json=JSON.parse(json); }catch(e){ /* leave as-is, handled below */ }
         }
@@ -493,7 +823,14 @@ function App(){
         setActiveTab('questions');
         setTimeout(()=>resultRef.current?.scrollIntoView({behavior:'smooth',block:'start'}),100);
       }
-    }catch(e){setError('Generation failed: '+e.message);}
+    }catch(e){
+      clearTimeout(timeoutId);
+      if(e.name==='AbortError'){
+        setError('Generation timed out after '+Math.round(GENERATION_TIMEOUT_MS/60000)+' minutes. Large offline papers (e.g. 80 marks) can take several minutes — please try again; if it keeps timing out, try a smaller mark range.');
+      }else{
+        setError('Generation failed: '+e.message);
+      }
+    }
     finally{setLoading(false);}
   }
 
@@ -512,7 +849,6 @@ function App(){
     finally{setFormLoading(false);}
   }
 
-  // Dynamic step labels based on test type
   const stepsConfig=testType==='online'
     ?[
       {n:1,label:'Configure',desc:'Class, subject & topics'},
@@ -530,13 +866,13 @@ function App(){
       {/* NAV */}
       <nav className="nav">
         <div className="nav-logo">
-          <div className="nav-logo-mark">m</div>
+          <div className="nav-logo-mark"><img src={LOGO_SRC} alt="myTST logo"/></div>
           myTST
         </div>
         <div className="nav-right">
           <div className="nav-dot"/>
           <span className="nav-status">Live</span>
-          <span className="nav-tag">CBSE · CLASS 6–12</span>
+          <span className="nav-tag">CBSE · CLASS 10–12</span>
         </div>
       </nav>
 
@@ -547,10 +883,10 @@ function App(){
           Generate <span className="hi">Online &amp; Offline CBSE Tests</span><br/>in Seconds
         </h1>
         <p className="hero-sub a3">
-          Syllabus-aligned question papers for Class 6–12, all subjects. Create auto-graded Google Forms for online delivery or printable Word papers for offline classrooms.
+          Syllabus-aligned question papers for Class 10–12, every stream and subject. Create auto-graded Google Forms for online delivery or printable Word papers for offline classrooms.
         </p>
         <div className="hero-stats a4">
-          {[['30s','Generation'],['Class 6–12','All Classes'],['7+','Subjects']].map(([n,l])=>(
+          {[['30s','Generation'],['Class 10–12','All Streams'],['20+','Subjects']].map(([n,l])=>(
             <div key={l} className="hstat">
               <div className="hstat-n">{n}</div>
               <div className="hstat-l">{l}</div>
@@ -585,7 +921,7 @@ function App(){
           </div>
           <div className="card-body">
 
-            {/* ── Test Type Segmented Control ── */}
+            {/* Test Type */}
             <div style={{marginBottom:'20px'}}>
               <label className="field-label">Test Type <span>*</span></label>
               <div className="seg">
@@ -596,22 +932,20 @@ function App(){
 
             <div className="divider"/>
 
-            {/* ── Shared Fields (Class, Subject, Chapters, Topics) ── */}
+            {/* Shared Fields: Class, Subject, Chapters, Topics, Question Type, Email */}
             <div className="form-grid">
-              {/* Class */}
               <div>
                 <label className="field-label">Class / Exam <span>*</span></label>
                 <select className="tg-input" value={examType} onChange={e=>setExamType(e.target.value)}>
                   <option value="">Select class or exam</option>
                   <optgroup label="CBSE School">
-                    {['Class 6','Class 7','Class 8','Class 9','Class 10','Class 11','Class 12'].map(c=><option key={c}>{c}</option>)}
+                    {['Class 10','Class 11','Class 12'].map(c=><option key={c}>{c}</option>)}
                   </optgroup>
                   <optgroup label="Competitive Exams">
                     <option>JEE Mains</option><option>NEET</option>
                   </optgroup>
                 </select>
               </div>
-              {/* Subject */}
               <div>
                 <label className="field-label">Subject <span>*</span></label>
                 <select className="tg-input" value={subject} onChange={e=>setSubject(e.target.value)} disabled={!examType}>
@@ -619,15 +953,22 @@ function App(){
                   {subjects.map(s=><option key={s}>{s}</option>)}
                 </select>
               </div>
-              {/* Chapters */}
               <div className="field-full">
                 <label className="field-label">Chapters <span>*</span></label>
                 <MultiSelect options={chapterOpts} selected={chapters} onChange={setChapters} placeholder="Select one or more chapters…" disabled={!subject}/>
               </div>
-              {/* Topics */}
               <div className="field-full">
                 <label className="field-label">Topics <span>*</span></label>
                 <MultiSelect options={topicOpts} selected={topics} onChange={setTopics} placeholder="Select topics to include…" disabled={chapters.length===0}/>
+              </div>
+              <div className="field-full">
+                <label className="field-label">Question Type <span>*</span></label>
+                <MultiSelect options={qTypeOpts} selected={qTypes} onChange={handleQTypeChange} placeholder="Select question type(s)…" disabled={!subject}/>
+                <div className="field-hint">Options adjust to the subject you picked — pick "Mixed (All Types)" for a varied paper.</div>
+              </div>
+              <div className="field-full">
+                <label className="field-label">Teacher Email <span>*</span></label>
+                <input className="tg-input" type="email" placeholder="teacher@school.com" value={email} onChange={e=>setEmail(e.target.value)} style={{maxWidth:'360px'}}/>
               </div>
             </div>
 
@@ -637,12 +978,10 @@ function App(){
                 <div className="divider"/>
                 <div className="form-grid thirds">
                   <DifficultySelector value={difficulty} onChange={setDifficulty}/>
-                  {/* Questions */}
                   <div>
                     <label className="field-label">No. of Questions <span>*</span></label>
                     <input className="tg-input" type="number" placeholder="e.g. 10" min="1" max="30" value={numQ} onChange={e=>setNumQ(e.target.value)}/>
                   </div>
-                  {/* Time */}
                   <div>
                     <label className="field-label">Time Limit (min)</label>
                     <input className="tg-input" type="number" placeholder="Auto" value={timeLimit} onChange={e=>setTimeLimit(e.target.value)}/>
@@ -652,8 +991,7 @@ function App(){
 
                 <div className="divider"/>
 
-                {/* Mode */}
-                <div style={{marginBottom:'20px'}}>
+                <div style={{marginBottom:'8px'}}>
                   <label className="field-label">Generation Mode</label>
                   <div className="seg">
                     <button className={'seg-btn '+(mode==='ai_only'?'active-ai_only':'')} onClick={()=>setMode('ai_only')}>🤖 AI Generated</button>
@@ -661,12 +999,7 @@ function App(){
                     <button className="seg-btn soon" onClick={()=>setMode('pyq')}>📚 PYQ Only <span className="soon-tag">SOON</span></button>
                   </div>
                 </div>
-
-                {/* Email */}
-                <div style={{marginBottom:'24px'}}>
-                  <label className="field-label">Teacher Email</label>
-                  <input className="tg-input" type="email" placeholder="teacher@school.com" value={email} onChange={e=>setEmail(e.target.value)} style={{maxWidth:'360px'}}/>
-                </div>
+                <div style={{height:'8px'}}/>
               </>
             )}
 
@@ -681,7 +1014,6 @@ function App(){
                 <div className="divider"/>
 
                 <div className="form-grid">
-                  {/* Maximum Marks */}
                   <div>
                     <label className="field-label">Maximum Marks <span>*</span></label>
                     <select className="tg-input" value={maxMarks} onChange={e=>setMaxMarks(e.target.value)}>
@@ -690,10 +1022,10 @@ function App(){
                       <option value="30">30 Marks</option>
                       <option value="40">40 Marks</option>
                       <option value="50">50 Marks</option>
+                      <option value="70">70 Marks</option>
                       <option value="80">80 Marks</option>
                     </select>
                   </div>
-                  {/* Teacher ID */}
                   <div>
                     <label className="field-label">Teacher ID <span>*</span></label>
                     <input className="tg-input" type="text" placeholder="Enter Teacher ID" value={teacherId} onChange={e=>setTeacherId(e.target.value)}/>
@@ -711,17 +1043,15 @@ function App(){
               }
             </button>
 
-            {/* Loader */}
             {loading&&(
               <div className="loader-wrap">
                 <div className="loader-bar"><div className="loader-fill"/></div>
                 <div className="loader-txt">
-                  <span className="blink">▋</span> AI IS WRITING YOUR QUESTIONS
+                  <span className="blink">▋</span> {loaderMessage()} · {formatElapsed(elapsedSec)}
                 </div>
               </div>
             )}
 
-            {/* Error */}
             {error&&(
               <div className="err">
                 <span>⚠</span><span>{error}</span>
@@ -733,7 +1063,6 @@ function App(){
         {/* ONLINE RESULTS */}
         {testType==='online' && result&&(
           <div className="card results-card" ref={resultRef}>
-            {/* Header */}
             <div className="res-header">
               <div className="res-title">
                 Test Paper Generated <span className="res-ok">✓ SUCCESS</span>
@@ -751,15 +1080,13 @@ function App(){
               </div>
             </div>
 
-            {/* Meta chips */}
             <div className="meta-row">
-              {meta&&[meta.exam_type,meta.subject,meta.difficulty,meta.num_questions+' Questions',meta.time_limit+' min',meta.mode==='ai_only'?'AI Generated':'Mixed'].map(v=>(
+              {meta&&[meta.exam_type,meta.subject,meta.difficulty,meta.num_questions+' Questions',meta.time_limit+' min',meta.mode==='ai_only'?'AI Generated':'Mixed',(meta.question_types||[]).join(' / ')].filter(Boolean).map(v=>(
                 <span key={v} className={'meta-chip '+(v===meta.difficulty?'amber':'')}>{v}</span>
               ))}
               {meta?.test_id&&<span className="meta-chip" style={{fontFamily:'var(--mono)',fontSize:'10px'}}>ID: {meta.test_id}</span>}
             </div>
 
-            {/* Tabs */}
             <div className="tabs">
               {[['questions','Questions'],['answerkey','Answer Key'],['full','Full Paper']].map(([id,label])=>(
                 <div key={id} className={'tab '+(activeTab===id?'active':'')} onClick={()=>setActiveTab(id)}>
@@ -768,7 +1095,6 @@ function App(){
               ))}
             </div>
 
-            {/* Tab content */}
             <div className="tab-content">
               {activeTab==='questions'&&(
                 <div className="md-out" dangerouslySetInnerHTML={{__html:marked.parse(result.questions||result.cleaned||'')}}/>
@@ -786,7 +1112,6 @@ function App(){
             </div>
             <div className="scroll-fade"/>
 
-            {/* Google Form panel */}
             <div className="form-panel">
               <div className="form-panel-info">
                 <div className="form-panel-title">📋 Create Google Form Quiz</div>
@@ -815,7 +1140,6 @@ function App(){
               </div>
             </div>
 
-            {/* Form result link */}
             {formData?.form_link&&(
               <div style={{padding:'0 24px 20px'}}>
                 <div className="form-link-box">
@@ -827,7 +1151,6 @@ function App(){
               </div>
             )}
 
-            {/* Form error */}
             {formError&&(
               <div style={{padding:'0 24px 16px'}}>
                 <div className="err"><span>⚠</span><span>{formError}</span></div>
@@ -839,7 +1162,6 @@ function App(){
         {/* OFFLINE RESULTS */}
         {testType==='offline' && offlineDocs&&(
           <div className="card results-card" ref={resultRef}>
-            {/* Header */}
             <div className="res-header">
               <div className="res-title">
                 Test Paper Generated <span className="res-ok">✓ SUCCESS</span>
@@ -849,14 +1171,12 @@ function App(){
               </div>
             </div>
 
-            {/* Meta chips */}
             <div className="meta-row">
-              {meta&&[meta.exam_type,meta.subject,meta.difficulty,meta.maximum_marks+' Marks','Offline Paper'].map(v=>(
+              {meta&&[meta.exam_type,meta.subject,meta.difficulty,meta.maximum_marks+' Marks','Offline Paper',(meta.question_types||[]).join(' / ')].filter(Boolean).map(v=>(
                 <span key={v} className={'meta-chip '+(v===meta.difficulty?'amber':'')}>{v}</span>
               ))}
             </div>
 
-            {/* Tabs */}
             <div className="tabs">
               {[['questions','Questions'],['answerkey','Answer Key']].map(([id,label])=>(
                 <div key={id} className={'tab '+(activeTab===id?'active':'')} onClick={()=>setActiveTab(id)}>
@@ -865,7 +1185,6 @@ function App(){
               ))}
             </div>
 
-            {/* Tab content — document action buttons, never raw links or raw text */}
             <div className="tab-content">
               {activeTab==='questions'&&(
                 <div className="doc-actions-wrap">
@@ -887,7 +1206,6 @@ function App(){
               )}
             </div>
 
-            {/* Offline success card */}
             <div className="offline-success">
               <div className="offline-success-info">
                 <div className="offline-success-icon">✅</div>
@@ -907,8 +1225,8 @@ function App(){
         <h2 className="how-h2">Three steps to a complete test</h2>
         <div className="how-grid">
           {[
-            {n:'01',icon:'🎯',title:'Configure',desc:'Select class, subject, chapters and topics. Set difficulty level and number of questions.'},
-            {n:'02',icon:'⚡',title:'Generate',desc:'AI creates syllabus-aligned MCQ questions with answer key and explanations in 30 seconds.'},
+            {n:'01',icon:'🎯',title:'Configure',desc:'Select class, subject, chapters, topics and question type. Set difficulty level and number of questions.'},
+            {n:'02',icon:'⚡',title:'Generate',desc:'AI creates syllabus-aligned questions matched to your chosen question type, with answer key and explanations in 30 seconds.'},
             {n:'03',icon:'📋',title:'Deliver',desc:'One click creates a timed Google Form quiz or a printable Word document. Share the link or hand out papers.'}
           ].map(c=>(
             <div key={c.n} className="how-card">
