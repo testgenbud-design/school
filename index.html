@@ -927,7 +927,11 @@ function App(){
                 <MultiSelect options={qTypeOpts} selected={qTypes} onChange={handleQTypeChange} placeholder="Select question type(s)…" disabled={!subject}/>
                 <div className="field-hint">Options adjust to the subject you picked — pick "Mixed (All Types)" for a varied paper.</div>
               </div>
+              <div className="field-full">
+                <label className="field-label">Teacher Email <span>*</span></label>
+                <input className="tg-input" type="email" placeholder="teacher@school.com" value={email} onChange={e=>setEmail(e.target.value)} style={{maxWidth:'360px'}}/>
               </div>
+            </div>
 
             {/* ── ONLINE-ONLY FIELDS ── */}
             {testType==='online' && (
