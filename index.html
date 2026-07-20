@@ -204,17 +204,13 @@ const {useState,useRef,useEffect}=React;
 
 const LOGO_SRC='data:image/png;base64,__LOGO_BASE64__';
 
-const W1='https://mytestgen.app.n8n.cloud/webhook/c12174e9-3bdd-4a62-bca0-9df11d65d31e';
-const W2='https://mytestgen.app.n8n.cloud/webhook/88784932-ca43-4740-9718-091d8beb1575';
-
-// How long (ms) the browser will wait for the test-generation webhook before
-// giving up. Offline papers with high mark totals can legitimately take
-// several minutes, so this is set generously above that.
-const GENERATION_TIMEOUT_MS=600000; // 10 minutes
+const W1='https://mytstco.app.n8n.cloud/webhook/c12174e9-3bdd-4a62-bca0-9df11d65d31e';
+const W2='https://mytstco.app.n8n.cloud/webhook/88784932-ca43-4740-9718-091d8beb1575';
 
 // ============================================================
 // SYLLABUS — Class 10, 11, 12 (all streams: Science / Commerce / Humanities)
-// plus JEE Mains & NEET. Structure: subject -> { unit: [chapters...] }
+// CBSE only.
+// Structure: subject -> { unit: [chapters...] }
 // ============================================================
 const SYLLABUS={
 
@@ -446,18 +442,6 @@ const SYLLABUS={
     "Individual Differences and Self":["Variations in Psychological Attributes","Self and Personality"],
     "Disorders and Society":["Meeting Life Challenges","Psychological Disorders","Therapeutic Approaches","Attitude and Social Cognition","Social Influence & Group Processes","Developing Psychological Skills"]
   }
-},
-
-"JEE Mains":{
-  "Physics":{"Mechanics":["Kinematics","Laws of Motion","Work Energy Power","Rotational Motion","Gravitation","Properties of Matter"],"Thermodynamics":["Thermal Properties","Laws of Thermodynamics","Kinetic Theory of Gases","Heat Transfer"],"Waves & Optics":["Oscillations","Waves","Ray Optics","Wave Optics"],"Electromagnetism":["Electrostatics","Current Electricity","Magnetic Effects","Electromagnetic Induction","AC Circuits","EM Waves"],"Modern Physics":["Dual Nature of Radiation","Atoms & Nuclei","Semiconductors","Communication Systems"]},
-  "Chemistry":{"Physical Chemistry":["Mole Concept","Atomic Structure","Chemical Bonding","States of Matter","Thermodynamics","Equilibrium","Electrochemistry","Chemical Kinetics","Surface Chemistry"],"Inorganic Chemistry":["Periodic Table","s-Block Elements","p-Block Elements","d & f Block Elements","Coordination Compounds","Metallurgy","Environmental Chemistry"],"Organic Chemistry":["Basic Concepts","Hydrocarbons","Haloalkanes","Alcohols & Ethers","Aldehydes & Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"]},
-  "Mathematics":{"Algebra":["Sets & Relations","Complex Numbers","Sequences & Series","Permutations & Combinations","Binomial Theorem","Matrices & Determinants","Probability"],"Calculus":["Limits & Continuity","Differentiation","Applications of Derivatives","Integration","Definite Integrals","Differential Equations"],"Coordinate Geometry":["Straight Lines","Circles","Parabola","Ellipse","Hyperbola","3D Geometry"],"Trigonometry":["Trigonometric Functions","Inverse Trigonometry","Properties of Triangles"]}
-},
-
-"NEET":{
-  "Physics":{"Mechanics":["Kinematics","Laws of Motion","Work Energy Power","Rotational Motion","Gravitation"],"Thermodynamics":["Thermal Properties","Laws of Thermodynamics","Kinetic Theory"],"Waves & Optics":["Oscillations","Waves","Ray Optics","Wave Optics"],"Electromagnetism":["Electrostatics","Current Electricity","Magnetic Effects","EM Induction"],"Modern Physics":["Dual Nature","Atoms & Nuclei","Semiconductors"]},
-  "Chemistry":{"Physical Chemistry":["Mole Concept","Atomic Structure","Chemical Bonding","Thermodynamics","Equilibrium","Electrochemistry","Chemical Kinetics"],"Inorganic Chemistry":["Periodic Table","s-Block","p-Block","d-Block","Coordination Compounds","Metallurgy"],"Organic Chemistry":["Basic Concepts","Hydrocarbons","Haloalkanes","Alcohols","Aldehydes & Ketones","Carboxylic Acids","Amines","Biomolecules","Polymers"]},
-  "Biology":{"Botany":["Cell Biology","Plant Morphology","Plant Physiology","Reproduction in Plants","Genetics","Evolution","Ecology"],"Zoology":["Animal Kingdom","Human Physiology","Animal Reproduction","Human Reproduction","Genetics & Evolution","Biology in Human Welfare","Biotechnology","Ecology"]}
 }
 };
 
@@ -640,9 +624,7 @@ function App(){
   const [timeLimit,setTimeLimit]=useState('');
   const [email,setEmail]=useState('');
   const [maxMarks,setMaxMarks]=useState('');
-  const [teacherId,setTeacherId]=useState('');
   const [loading,setLoading]=useState(false);
-  const [elapsedSec,setElapsedSec]=useState(0);
   const [error,setError]=useState('');
   const [result,setResult]=useState(null);
   const [offlineDocs,setOfflineDocs]=useState(null);
@@ -663,25 +645,6 @@ function App(){
   useEffect(()=>{setSubject('');setChapters([]);setTopics([]);setQTypes([]);},[examType]);
   useEffect(()=>{setChapters([]);setTopics([]);setQTypes([]);},[subject]);
   useEffect(()=>{setTopics([]);},[chapters]);
-
-  // Elapsed-time ticker while a generation request is in flight — drives the
-  // "still working" loader messaging below.
-  useEffect(()=>{
-    if(!loading){setElapsedSec(0);return;}
-    const iv=setInterval(()=>setElapsedSec(s=>s+1),1000);
-    return()=>clearInterval(iv);
-  },[loading]);
-
-  function loaderMessage(){
-    if(elapsedSec<20)return'AI IS WRITING YOUR QUESTIONS';
-    if(elapsedSec<60)return'STILL GENERATING — LARGER PAPERS TAKE LONGER';
-    if(elapsedSec<180)return'ALMOST THERE — HIGH-MARK PAPERS CAN TAKE A FEW MINUTES';
-    return'STILL WORKING — THIS CAN TAKE UP TO '+Math.round(GENERATION_TIMEOUT_MS/60000)+' MIN FOR LARGE PAPERS';
-  }
-  function formatElapsed(s){
-    const m=Math.floor(s/60),r=s%60;
-    return m>0?(m+'m '+r+'s'):(r+'s');
-  }
 
   function switchTestType(tt){
     if(tt===testType)return;
@@ -720,7 +683,7 @@ function App(){
     if(testType==='online'){
       if(!difficulty||!numQ){setError('Please fill in all required fields.');return;}
     }else{
-      if(!difficulty||!maxMarks||!teacherId.trim()){setError('Please fill in all required fields.');return;}
+      if(!difficulty||!maxMarks){setError('Please fill in all required fields.');return;}
     }
 
     setError('');setLoading(true);setResult(null);setOfflineDocs(null);setFormData(null);setFormError('');
@@ -748,13 +711,16 @@ function App(){
         question_types:qTypes,
         difficulty,
         maximum_marks:parseInt(maxMarks),
-        teacher_id:teacherId.trim(),
+        teacher_id:email.trim().toLowerCase(),
         teacher_email:email.trim().toLowerCase()
       };
     }
 
+    // Large offline papers (e.g. 80 marks) can take several minutes to generate.
+    // Give the request plenty of room before giving up.
+    const FETCH_TIMEOUT_MS=6*60*1000; // 6 minutes
     const controller=new AbortController();
-    const timeoutId=setTimeout(()=>controller.abort(),GENERATION_TIMEOUT_MS);
+    const timeoutId=setTimeout(()=>controller.abort(),FETCH_TIMEOUT_MS);
 
     try{
       const res=await fetch(W1,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
@@ -826,7 +792,7 @@ function App(){
     }catch(e){
       clearTimeout(timeoutId);
       if(e.name==='AbortError'){
-        setError('Generation timed out after '+Math.round(GENERATION_TIMEOUT_MS/60000)+' minutes. Large offline papers (e.g. 80 marks) can take several minutes — please try again; if it keeps timing out, try a smaller mark range.');
+        setError('Generation is taking longer than expected and timed out after 6 minutes. Large offline papers (e.g. 80 marks) can take several minutes — please try again.');
       }else{
         setError('Generation failed: '+e.message);
       }
@@ -935,12 +901,10 @@ function App(){
             {/* Shared Fields: Class, Subject, Chapters, Topics, Question Type, Email */}
             <div className="form-grid">
               <div>
-                <label className="field-label">Class / Exam <span>*</span></label>
+                <label className="field-label">Class <span>*</span></label>
                 <select className="tg-input" value={examType} onChange={e=>setExamType(e.target.value)}>
-                  <option value="">Select class or exam</option>
-                  <optgroup label="CBSE School">
-                    {['Class 10','Class 11','Class 12'].map(c=><option key={c}>{c}</option>)}
-                  </optgroup>
+                  <option value="">Select class</option>
+                  {['Class 10','Class 11','Class 12'].map(c=><option key={c}>{c}</option>)}
                 </select>
               </div>
               <div>
@@ -1022,10 +986,9 @@ function App(){
                       <option value="70">70 Marks</option>
                       <option value="80">80 Marks</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className="field-label">Teacher ID <span>*</span></label>
-                    <input className="tg-input" type="text" placeholder="Enter Teacher ID" value={teacherId} onChange={e=>setTeacherId(e.target.value)}/>
+                    {maxMarks&&parseInt(maxMarks)>=70&&(
+                      <div className="time-hint"><span className="time-dot"/>Larger papers (70–80 marks) can take up to ~4 minutes to generate</div>
+                    )}
                   </div>
                 </div>
                 <div style={{height:'8px'}}/>
@@ -1044,7 +1007,9 @@ function App(){
               <div className="loader-wrap">
                 <div className="loader-bar"><div className="loader-fill"/></div>
                 <div className="loader-txt">
-                  <span className="blink">▋</span> {loaderMessage()} · {formatElapsed(elapsedSec)}
+                  <span className="blink">▋</span> {testType==='offline'
+                    ?'AI IS WRITING YOUR QUESTIONS — LARGER PAPERS CAN TAKE A FEW MINUTES'
+                    :'AI IS WRITING YOUR QUESTIONS'}
                 </div>
               </div>
             )}
