@@ -692,7 +692,7 @@ function App(){
 
     // Large offline papers (e.g. 80 marks) can take several minutes to generate.
     // Give the request plenty of room before giving up.
-    const FETCH_TIMEOUT_MS=6*60*1000; // 6 minutes
+    const FETCH_TIMEOUT_MS=20*60*1000; // 6 minutes
     const controller=new AbortController();
     const timeoutId=setTimeout(()=>controller.abort(),FETCH_TIMEOUT_MS);
 
