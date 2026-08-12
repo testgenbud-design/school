@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#080C14" />
+  <link rel="icon" type="image/png" href="assets/mytst-kangaroo-logo.png" />
+  <link rel="apple-touch-icon" href="assets/mytst-kangaroo-logo.png" />
   <title>myTST — CBSE Question Paper Generator</title>
   <style>
     :root {
@@ -77,15 +79,18 @@
     }
     .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.5px; }
     .brand-mark {
-      width: 30px;
-      height: 30px;
+      width: 38px;
+      height: 38px;
       display: grid;
       place-items: center;
-      color: #211302;
-      background: linear-gradient(135deg, var(--amber-light), var(--amber));
-      border-radius: 9px;
-      box-shadow: 0 0 20px rgba(245,166,35,.25);
-      font-size: 18px;
+      flex: 0 0 auto;
+      overflow: hidden;
+    }
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 9px rgba(245,166,35,.24));
     }
     .nav-meta { display: flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 10px; color: var(--amber); letter-spacing: 1px; }
     .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 9px var(--green); }
@@ -383,7 +388,7 @@
 </head>
 <body>
   <header class="nav">
-    <div class="brand"><span class="brand-mark" aria-hidden="true">✦</span><span>myTST</span></div>
+    <div class="brand"><span class="brand-mark"><img src="assets/mytst-kangaroo-logo.png" alt="myTST kangaroo logo" /></span><span>myTST</span></div>
     <div class="nav-meta"><span class="live-dot" aria-hidden="true"></span><span>LIVE</span><span class="nav-badge">CBSE · CLASS 10–12</span></div>
   </header>
 
@@ -446,21 +451,33 @@
                   <option value="70">70 Marks</option>
                   <option value="80">80 Marks</option>
                 </select>
-                <div class="marks-order-note">↳ Select marks first — the chapter selector unlocks with the correct CBSE chapter rule.</div>
+                <div class="marks-order-note">↳ Select marks first — the unit / chapter selectors unlock with the correct CBSE chapter rule.</div>
+              </div>
+
+              <!-- Class 11–12: the first level is Units; the next level is actual Chapters. -->
+              <div class="field full hidden" id="unitsField">
+                <label class="label">Units <span class="required">*</span></label>
+                <div class="multi-select" id="unitsSelect">
+                  <button type="button" class="multi-trigger" id="unitsTrigger" aria-haspopup="listbox" aria-expanded="false" disabled>
+                    <span class="selection-text"><span class="placeholder">Select units…</span></span><span class="multi-chevron">⌄</span>
+                  </button>
+                  <div class="select-menu" id="unitsMenu" role="listbox" aria-label="Units"></div>
+                </div>
+                <div class="hint">For Class 11 and Class 12, select units first to reveal their chapter names. Marks rules apply to the chapters selected next.</div>
               </div>
 
               <div class="field full" id="chaptersField">
-                <label class="label">Chapters / Units <span class="required">*</span></label>
+                <label class="label" id="chaptersLabel">Chapters <span class="required">*</span></label>
                 <div class="multi-select" id="chaptersSelect">
                   <button type="button" class="multi-trigger" id="chaptersTrigger" aria-haspopup="listbox" aria-expanded="false">
-                    <span class="selection-text"><span class="placeholder">Select chapters / units…</span></span><span class="multi-chevron">⌄</span>
+                    <span class="selection-text"><span class="placeholder">Select chapters…</span></span><span class="multi-chevron">⌄</span>
                   </button>
-                  <div class="select-menu" id="chaptersMenu" role="listbox" aria-label="Chapters and units"></div>
+                  <div class="select-menu" id="chaptersMenu" role="listbox" aria-label="Chapters"></div>
                 </div>
-                <div id="chapterRule" class="hint">Choose a subject to see available chapters and units.</div>
+                <div id="chapterRule" class="hint">Choose a subject to see available chapters.</div>
               </div>
 
-              <div class="field full">
+              <div class="field full" id="topicsField">
                 <label class="label">Topics <span class="required">*</span></label>
                 <div class="multi-select" id="topicsSelect">
                   <button type="button" class="multi-trigger" id="topicsTrigger" aria-haspopup="listbox" aria-expanded="false" disabled>
@@ -531,7 +548,7 @@
       <div class="how-kicker">HOW IT WORKS</div>
       <h2 id="how-title">Three steps to a complete question paper</h2>
       <div class="how-grid">
-        <article class="how-card"><div class="how-number">01</div><h3>Configure</h3><p>Choose class, subject, marks, units, topics and difficulty. In Offline mode, marks set the chapter-selection rule first.</p></article>
+        <article class="how-card"><div class="how-number">01</div><h3>Configure</h3><p>Choose class, subject, marks and difficulty. Class 10 uses Chapters → Topics; Class 11–12 uses Units → Chapters.</p></article>
         <article class="how-card"><div class="how-number">02</div><h3>Generate</h3><p>AI produces a syllabus-aligned paper, based on your chosen question formats and classroom requirements.</p></article>
         <article class="how-card"><div class="how-number">03</div><h3>Deliver</h3><p>Use an auto-graded online test or open and download the print-ready Word question paper and answer key.</p></article>
       </div>
@@ -710,6 +727,8 @@
       className: '',
       subject: '',
       maximumMarks: '',
+      // For Class 11–12 these are real syllabus Units. Chapters are stored separately.
+      units: [],
       chapters: [],
       topics: [],
       questionTypes: [],
@@ -736,15 +755,28 @@
       return ['MCQ', 'Assertion–Reason', 'Very Short Answer', 'Short Answer', 'Long Answer', 'Case-Based', 'Mixed (All Types)'];
     }
 
-    function selectedChapterOptions() {
+    function usesUnitChapterHierarchy() {
+      return state.className === 'Class 11' || state.className === 'Class 12';
+    }
+    function selectedUnitOptions() {
       if (!state.className || !state.subject) return [];
       return Object.keys(SYLLABUS[state.className]?.[state.subject] || {});
     }
-    function selectedTopicOptions() {
+    function selectedChapterOptions() {
       if (!state.className || !state.subject) return [];
+      const subjectData = SYLLABUS[state.className]?.[state.subject] || {};
+      // Class 10 keys are Chapters. Class 11–12 keys are Units and their
+      // child values are the actual Chapter names.
+      return usesUnitChapterHierarchy()
+        ? state.units.flatMap((unit) => subjectData[unit] || [])
+        : Object.keys(subjectData);
+    }
+    function selectedTopicOptions() {
+      if (!state.className || !state.subject || usesUnitChapterHierarchy()) return [];
       const subjectData = SYLLABUS[state.className]?.[state.subject] || {};
       return state.chapters.flatMap((chapter) => subjectData[chapter] || []);
     }
+    function chapterNoun(count = 2) { return count === 1 ? 'chapter' : 'chapters'; }
     function currentMarkRule() {
       return state.testType === 'offline' && state.maximumMarks ? OFFLINE_MARK_RULES[state.maximumMarks] : null;
     }
@@ -757,10 +789,11 @@
     function chapterRuleStatus() {
       const rule = currentMarkRule();
       if (!rule) return '';
+      if (usesUnitChapterHierarchy() && !state.units.length) return 'Select one or more units first to unlock their chapter names.';
       const count = state.chapters.length;
       if (count < rule.min) {
         const remaining = rule.min - count;
-        return `Select ${remaining} more chapter${remaining === 1 ? '' : 's'} to continue.`;
+        return `Select ${remaining} more ${chapterNoun(remaining)} to continue.`;
       }
       if (rule.max !== null && count === rule.max) return 'Limit reached — extra chapter checkboxes are disabled.';
       return 'Rule met — you may add more chapters if desired.';
@@ -785,9 +818,10 @@
       if (!state.className) missing.push('class');
       if (!state.subject) missing.push('subject');
       if (state.testType === 'offline' && !state.maximumMarks) missing.push('maximum marks');
-      if (!state.chapters.length) missing.push('chapters / units');
+      if (usesUnitChapterHierarchy() && !state.units.length) missing.push('units');
+      if (!state.chapters.length) missing.push('chapters');
       if (state.testType === 'offline' && state.maximumMarks && !chapterRuleIsMet()) missing.push('the chapter selection rule');
-      if (!state.topics.length) missing.push('topics');
+      if (!usesUnitChapterHierarchy() && !state.topics.length) missing.push('topics');
       if (!state.questionTypes.length) missing.push('question type');
       if (!state.difficulty) missing.push('difficulty');
       if (state.testType === 'online' && !state.numberQuestions) missing.push('number of questions');
@@ -820,7 +854,7 @@
 
     function renderMenu(key, options, selectedValues, optionsConfig = {}) {
       const menu = document.getElementById(`${key}Menu`);
-      const { disabled = false, maxSelections = null, showCount = false } = optionsConfig;
+      const { disabled = false, maxSelections = null, showCount = false, countLabel = 'topics' } = optionsConfig;
       if (!options.length) {
         menu.innerHTML = `<div class="select-option disabled">No options available yet.</div>`;
         return;
@@ -834,7 +868,7 @@
           <label class="select-option ${checked ? 'selected' : ''} ${optionDisabled ? 'disabled' : ''}">
             <input type="checkbox" data-selection-key="${key}" value="${escapeHTML(option)}" ${checked ? 'checked' : ''} ${optionDisabled ? 'disabled' : ''} />
             <span>${escapeHTML(option)}</span>
-            ${count !== null ? `<span class="unit-count">${count} topics</span>` : ''}
+            ${count !== null ? `<span class="unit-count">${count} ${countLabel}</span>` : ''}
           </label>`;
       }).join('');
     }
@@ -843,7 +877,9 @@
       const ruleContainer = document.getElementById('chapterRule');
       if (state.testType !== 'offline') {
         ruleContainer.className = 'hint';
-        ruleContainer.textContent = state.subject ? 'Select one or more chapters / units for your paper.' : 'Choose a subject to see available chapters and units.';
+        if (!state.subject) ruleContainer.textContent = 'Choose a subject to see available chapters.';
+        else if (usesUnitChapterHierarchy() && !state.units.length) ruleContainer.textContent = 'Select one or more units first to reveal their chapters.';
+        else ruleContainer.textContent = 'Select one or more chapters for your paper.';
         return;
       }
       if (!state.maximumMarks) {
@@ -861,6 +897,8 @@
       const classSelect = document.getElementById('classSelect');
       const subjectSelect = document.getElementById('subjectSelect');
       const marksField = document.getElementById('marksField');
+      const unitsField = document.getElementById('unitsField');
+      const topicsField = document.getElementById('topicsField');
       const onlineFields = document.getElementById('onlineFields');
       const offlineFields = document.getElementById('offlineFields');
       const modeBadge = document.getElementById('modeBadge');
@@ -882,13 +920,25 @@
       document.getElementById('onlineMode').classList.toggle('selected', state.testType === 'online');
       document.getElementById('offlineMode').classList.toggle('selected', state.testType === 'offline');
 
+      const seniorClass = usesUnitChapterHierarchy();
+      const unitOptions = selectedUnitOptions();
       const chapterOptions = selectedChapterOptions();
       const topicOptions = selectedTopicOptions();
       const questionOptions = state.subject ? getQuestionTypes(state.subject) : [];
-      const chapterLocked = !state.subject || (state.testType === 'offline' && !state.maximumMarks);
+      const markGateLocked = !state.subject || (state.testType === 'offline' && !state.maximumMarks);
+      const unitsLocked = markGateLocked;
+      const chaptersLocked = markGateLocked || (seniorClass && !state.units.length);
       const rule = currentMarkRule();
-      renderTrigger('chapters', state.chapters, chapterLocked ? 'Select maximum marks to unlock chapters…' : 'Select chapters / units…', chapterLocked);
-      renderMenu('chapters', chapterOptions, state.chapters, { disabled: chapterLocked, maxSelections: rule?.max ?? null, showCount: true });
+
+      // Class 11 / 12 have a real Unit → Chapter hierarchy. Class 10 retains
+      // Chapter → Topic, so there is no separate Unit picker in Class 10.
+      unitsField.classList.toggle('hidden', !seniorClass);
+      topicsField.classList.toggle('hidden', seniorClass);
+      document.getElementById('chaptersLabel').innerHTML = `Chapters <span class="required">*</span>`;
+      renderTrigger('units', state.units, unitsLocked ? 'Select maximum marks to unlock units…' : 'Select units…', unitsLocked);
+      renderMenu('units', unitOptions, state.units, { disabled: unitsLocked, showCount: true, countLabel: 'chapters' });
+      renderTrigger('chapters', state.chapters, chaptersLocked ? (seniorClass && state.subject && !state.units.length ? 'Select units first…' : 'Select maximum marks to unlock chapters…') : 'Select chapters…', chaptersLocked);
+      renderMenu('chapters', chapterOptions, state.chapters, { disabled: chaptersLocked, maxSelections: rule?.max ?? null, showCount: !seniorClass, countLabel: 'topics' });
       renderTrigger('topics', state.topics, 'Select topics to include…', !state.chapters.length);
       renderMenu('topics', topicOptions, state.topics, { disabled: !state.chapters.length });
       renderTrigger('questionTypes', state.questionTypes, 'Select question type(s)…', !state.subject);
@@ -935,6 +985,7 @@
       state.maximumMarks = '';
       // Do not carry a prior mode's selection into Offline mode: marks must
       // deliberately be chosen before a fresh Chapters / Units selection.
+      state.units = [];
       state.chapters = [];
       state.topics = [];
       state.adjustmentNote = '';
@@ -954,11 +1005,17 @@
       } else {
         state[key] = selected.filter((item) => item !== value);
       }
+      if (key === 'units') {
+        // A chapter is valid only while one of its parent units remains selected.
+        const availableChapters = new Set(selectedChapterOptions());
+        state.chapters = state.chapters.filter((chapter) => availableChapters.has(chapter));
+        state.topics = [];
+      }
       if (key === 'chapters') {
         const availableTopics = new Set(selectedTopicOptions());
         state.topics = state.topics.filter((topic) => availableTopics.has(topic));
       }
-      if (key === 'questionTypes') {
+      if (key === 'questionTypes') { 
         const mixed = 'Mixed (All Types)';
         if (isChecked && value === mixed) state.questionTypes = [mixed];
         else if (isChecked && value !== mixed) state.questionTypes = state.questionTypes.filter((type) => type !== mixed);
@@ -971,6 +1028,26 @@
     function showError(message) { const error = document.getElementById('formError'); error.textContent = `⚠ ${message}`; error.classList.add('show'); }
 
     function toTitle(value) { return String(value).replace(/\w\S*/g, (word) => word.charAt(0).toUpperCase() + word.slice(1)); }
+    function buildScopePayload() {
+      if (usesUnitChapterHierarchy()) {
+        return {
+          syllabus_hierarchy: 'units_to_chapters',
+          units: state.units,
+          chapters: state.chapters,
+          topics: [],
+          selected_units: state.units,
+          selected_chapters: state.chapters
+        };
+      }
+      return {
+        syllabus_hierarchy: 'chapters_to_topics',
+        units: [],
+        chapters: state.chapters,
+        topics: state.topics,
+        selected_chapters: state.chapters,
+        selected_topics: state.topics
+      };
+    }
     function parsePaper(raw) {
       const trimmed = String(raw || '').replace(/^=+/, '').trim();
       try {
@@ -1030,8 +1107,7 @@
         test_type: 'offline',
         exam_type: state.className,
         subject: toTitle(state.subject),
-        chapters: state.chapters,
-        topics: state.topics,
+        ...buildScopePayload(),
         question_types: state.questionTypes,
         difficulty: state.difficulty,
         maximum_marks: Number(state.maximumMarks),
@@ -1041,8 +1117,7 @@
         test_type: 'online',
         exam_type: state.className,
         subject: toTitle(state.subject),
-        chapters: state.chapters,
-        topics: state.topics,
+        ...buildScopePayload(),
         question_types: state.questionTypes,
         difficulty: state.difficulty,
         num_questions: Number(state.numberQuestions),
@@ -1078,12 +1153,12 @@
     document.getElementById('offlineMode').addEventListener('click', () => setTestType('offline'));
     document.getElementById('classSelect').addEventListener('change', (event) => {
       state.className = event.target.value;
-      state.subject = ''; state.chapters = []; state.topics = []; state.questionTypes = []; state.adjustmentNote = '';
+      state.subject = ''; state.units = []; state.chapters = []; state.topics = []; state.questionTypes = []; state.adjustmentNote = '';
       closeMenus(); clearError(); renderConfiguration();
     });
     document.getElementById('subjectSelect').addEventListener('change', (event) => {
       state.subject = event.target.value;
-      state.chapters = []; state.topics = []; state.questionTypes = []; state.adjustmentNote = '';
+      state.units = []; state.chapters = []; state.topics = []; state.questionTypes = []; state.adjustmentNote = '';
       closeMenus(); clearError(); renderConfiguration();
     });
     document.getElementById('marksSelect').addEventListener('change', (event) => {
@@ -1120,5 +1195,5 @@
 
     renderConfiguration();
   </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2a2f432a80c8a7c',t:'MTc4NjU3NDEzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
