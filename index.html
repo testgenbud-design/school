@@ -390,12 +390,11 @@
 <body>
   <header class="nav">
     <div class="brand"><span class="brand-mark"><img id="brandLogo" src="assets/mytst-kangaroo-logo-192.png" alt="myTST kangaroo logo" /></span><span>myTST</span></div>
-    <div class="nav-meta"><span class="live-dot" aria-hidden="true"></span><span>LIVE</span><span class="nav-badge">CBSE · CLASS 10–12</span></div>
+    <div class="nav-meta"><span class="live-dot" aria-hidden="true"></span><span></span><span class="nav-badge">CBSE · CLASS 10–12</span></div>
   </header>
 
   <main>
     <section class="hero" aria-labelledby="page-title">
-      <div class="eyebrow">⚡ AI-powered test generation</div>
       <h1 id="page-title">Your tool to generate <span class="highlight">CBSE Question Paper</span> in minutes</h1>
       <p>Configure syllabus-aligned online quizzes or print-ready offline papers for Class 10–12 in a few thoughtful clicks.</p>
       <div class="stats" aria-label="Product capabilities">
@@ -408,7 +407,7 @@
     <section class="workspace" aria-label="Question paper configuration">
       <div class="steps" aria-label="Generation progress">
         <div class="step active"><span class="step-number">1</span><div class="step-copy"><b>Configure</b><span>Class, marks and chapters</span></div></div>
-        <div class="step"><span class="step-number">2</span><div class="step-copy"><b>Generate</b><span>AI creates the paper</span></div></div>
+        <div class="step"><span class="step-number">2</span><div class="step-copy"><b>Generate</b><span>myTST creates the paper</span></div></div>
         <div class="step"><span class="step-number">3</span><div class="step-copy"><b>Deliver</b><span>Form or Word document</span></div></div>
       </div>
 
@@ -440,7 +439,14 @@
                 <select id="subjectSelect" class="input" disabled><option value="">Select subject</option></select>
               </div>
 
-              <!-- Offline-only: intentionally placed BEFORE Chapters / Units. -->
+              <!-- Language subjects use their prescribed book before chapter selection. -->
+              <div id="booksField" class="field full hidden">
+                <label class="label" for="bookSelect">Book Name <span class="required">*</span></label>
+                <select id="bookSelect" class="input" disabled><option value="">Select book</option></select>
+                <div class="hint">Choose the prescribed book first; its chapter list will appear below.</div>
+              </div>
+
+              <!-- Offline-only: intentionally placed BEFORE Books / Units / Chapters. -->
               <div id="marksField" class="field full hidden">
                 <label class="label" for="marksSelect">Maximum Marks <span class="required">*</span></label>
                 <select id="marksSelect" class="input">
@@ -455,7 +461,7 @@
                 <div class="marks-order-note">↳ Select marks first — the unit / chapter selectors unlock with the correct CBSE chapter rule.</div>
               </div>
 
-              <!-- Class 11–12: the first level is Units; the next level is actual Chapters. -->
+              <!-- Unit-based subjects: select Units before their actual Chapters. -->
               <div class="field full hidden" id="unitsField">
                 <label class="label">Units <span class="required">*</span></label>
                 <div class="multi-select" id="unitsSelect">
@@ -464,7 +470,7 @@
                   </button>
                   <div class="select-menu" id="unitsMenu" role="listbox" aria-label="Units"></div>
                 </div>
-                <div class="hint">For Class 11 and Class 12, select units first to reveal their chapter names. Marks rules apply to the chapters selected next.</div>
+                <div class="hint">Select units first to reveal their chapter names. Marks rules apply to the chapters selected next.</div>
               </div>
 
               <div class="field full" id="chaptersField">
@@ -486,7 +492,7 @@
                   </button>
                   <div class="select-menu" id="topicsMenu" role="listbox" aria-label="Topics"></div>
                 </div>
-                <div class="hint">Topics are filtered from your selected chapters / units.</div>
+                <div class="hint">Topics are filtered from your selected chapters where the CBSE syllabus has a chapter-to-topic structure.</div>
               </div>
 
               <div class="field full">
@@ -535,7 +541,7 @@
             <div class="button-row">
               <button id="generateButton" class="generate" type="submit" disabled>⚡ Generate Test Paper</button>
               <div id="formStatus" class="inline-status" aria-live="polite"></div>
-              <div id="loadingCopy" class="loading-copy">▋ AI IS WRITING YOUR QUESTIONS</div>
+              <div id="loadingCopy" class="loading-copy">▋ myTST IS WRITING YOUR QUESTIONS</div>
               <div id="formError" class="error" role="alert"></div>
             </div>
           </form>
@@ -549,8 +555,8 @@
       <div class="how-kicker">HOW IT WORKS</div>
       <h2 id="how-title">Three steps to a complete question paper</h2>
       <div class="how-grid">
-        <article class="how-card"><div class="how-number">01</div><h3>Configure</h3><p>Choose class, subject, marks and difficulty. Class 10 uses Chapters → Topics; Class 11–12 uses Units → Chapters.</p></article>
-        <article class="how-card"><div class="how-number">02</div><h3>Generate</h3><p>AI produces a syllabus-aligned paper, based on your chosen question formats and classroom requirements.</p></article>
+        <article class="how-card"><div class="how-number">01</div><h3>Configure</h3><p>Choose class, subject, marks and difficulty. The form adapts to Units → Chapters, Chapters → Topics, or Books → Chapters for language subjects.</p></article>
+        <article class="how-card"><div class="how-number">02</div><h3>Generate</h3><p>myTST produces a syllabus-aligned paper, based on your chosen question formats and classroom requirements.</p></article>
         <article class="how-card"><div class="how-number">03</div><h3>Deliver</h3><p>Use an auto-graded online test or open and download the print-ready Word question paper and answer key.</p></article>
       </div>
     </section>
@@ -578,145 +584,1025 @@
 
     /* Concise CBSE syllabus map used by the selectors. */
     const SYLLABUS = {
-      'Class 10': {
-        'Science': {
-          'Life Processes': ['Nutrition', 'Respiration', 'Transportation', 'Excretion'],
-          'Control & Coordination': ['Nervous System', 'Hormones in Animals', 'Control in Plants'],
-          'Heredity & Evolution': ['Heredity', 'Evolution', 'Speciation'],
-          'Chemical Reactions': ['Chemical Reactions & Equations', 'Acids, Bases & Salts', 'Metals & Non-Metals', 'Carbon Compounds'],
-          'Natural Phenomena': ['Light – Reflection', 'Light – Refraction', 'Electricity', 'Magnetic Effects of Current'],
-          'Natural Resources': ['Sources of Energy', 'Our Environment', 'Management of Natural Resources']
-        },
-        'Mathematics': {
-          'Number System': ['Real Numbers'],
-          'Algebra': ['Polynomials', 'Pair of Linear Equations', 'Quadratic Equations', 'Arithmetic Progressions'],
-          'Geometry': ['Triangles', 'Circles', 'Constructions'],
-          'Trigonometry': ['Introduction to Trigonometry', 'Applications of Trigonometry'],
-          'Mensuration': ['Areas Related to Circles', 'Surface Areas & Volumes'],
-          'Statistics & Probability': ['Statistics', 'Probability'],
-          'Coordinate Geometry': ['Coordinate Geometry']
-        },
-        'Social Science': {
-          'History': ['Nationalism in Europe', 'Nationalism in India', 'Age of Industrialisation', 'Print Culture'],
-          'Geography': ['Resources & Development', 'Water Resources', 'Agriculture', 'Manufacturing Industries'],
-          'Political Science': ['Power Sharing', 'Federalism', 'Political Parties', 'Outcomes of Democracy'],
-          'Economics': ['Development', 'Sectors of the Indian Economy', 'Money & Credit', 'Globalisation']
-        },
-        'English': {
-          'Reading': ['Unseen Passage – Factual', 'Unseen Passage – Discursive'],
-          'Writing & Grammar': ['Formal Letter', 'Analytical Paragraph', 'Tenses', 'Reported Speech'],
-          'First Flight': ['A Letter to God', 'Nelson Mandela', 'Glimpses of India', 'Madam Rides the Bus'],
-          'Footprints Without Feet': ['A Triumph of Surgery', 'The Thief’s Story', 'Bholi', 'The Book That Saved the Earth']
-        },
-        'Hindi': {
-          'क्षितिज भाग 2 – गद्य': ['नेताजी का चश्मा', 'बालगोबिन भगत', 'लखनवी अंदाज़'],
-          'क्षितिज भाग 2 – काव्य': ['पद', 'राम-लक्ष्मण-परशुराम संवाद', 'आत्मकथ्य'],
-          'व्याकरण एवं रचना': ['समास', 'मुहावरे', 'पत्र लेखन', 'अनुच्छेद लेखन']
-        },
-        'Computer Applications': {
-          'Programming': ['Python Revision', 'Working with Functions', 'File Handling'],
-          'Database': ['Introduction to MySQL', 'SQL Commands', 'Queries'],
-          'Networking & Ethics': ['Network Concepts', 'Internet Services', 'Cyber Crime']
-        }
+      "Class 10": {
+            "Science": {
+                  "hierarchy": "chapters_to_topics",
+                  "groups": {
+                        "Chemical Reactions and Equations": [
+                              "Chemical equations",
+                              "Types of chemical reactions",
+                              "Oxidation and reduction",
+                              "Effects of oxidation in everyday life"
+                        ],
+                        "Acids, Bases and Salts": [
+                              "Understanding acids and bases",
+                              "pH scale",
+                              "Salts and their uses"
+                        ],
+                        "Metals and Non-metals": [
+                              "Physical properties",
+                              "Chemical properties",
+                              "Reactivity series",
+                              "Occurrence and extraction of metals"
+                        ],
+                        "Carbon and Its Compounds": [
+                              "Covalent bonding",
+                              "Homologous series",
+                              "Ethanol and ethanoic acid",
+                              "Soaps and detergents"
+                        ],
+                        "Life Processes": [
+                              "Nutrition",
+                              "Respiration",
+                              "Transportation",
+                              "Excretion"
+                        ],
+                        "Control and Coordination": [
+                              "Nervous system",
+                              "Coordination in plants",
+                              "Hormones in animals"
+                        ],
+                        "How do Organisms Reproduce?": [
+                              "Asexual reproduction",
+                              "Sexual reproduction",
+                              "Reproductive health"
+                        ],
+                        "Heredity and Evolution": [
+                              "Heredity",
+                              "Mendel's laws",
+                              "Evolution and speciation"
+                        ],
+                        "Light – Reflection and Refraction": [
+                              "Spherical mirrors",
+                              "Refraction",
+                              "Lenses"
+                        ],
+                        "The Human Eye and the Colourful World": [
+                              "Human eye",
+                              "Defects of vision",
+                              "Dispersion and scattering"
+                        ],
+                        "Electricity": [
+                              "Current and potential difference",
+                              "Ohm's law",
+                              "Resistance",
+                              "Electrical power"
+                        ],
+                        "Magnetic Effects of Electric Current": [
+                              "Magnetic field",
+                              "Electromagnetic induction",
+                              "Electric motor and generator"
+                        ],
+                        "Our Environment": [
+                              "Ecosystem",
+                              "Food chains and food webs",
+                              "Ozone layer",
+                              "Waste management"
+                        ],
+                        "Sustainable Management of Natural Resources": [
+                              "Forest and wildlife",
+                              "Water harvesting",
+                              "Coal and petroleum"
+                        ]
+                  }
+            },
+            "Mathematics": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Number Systems": [
+                              "Real Numbers"
+                        ],
+                        "Algebra": [
+                              "Polynomials",
+                              "Pair of Linear Equations in Two Variables",
+                              "Quadratic Equations",
+                              "Arithmetic Progressions"
+                        ],
+                        "Coordinate Geometry": [
+                              "Coordinate Geometry"
+                        ],
+                        "Geometry": [
+                              "Triangles",
+                              "Circles",
+                              "Constructions"
+                        ],
+                        "Trigonometry": [
+                              "Introduction to Trigonometry",
+                              "Applications of Trigonometry"
+                        ],
+                        "Mensuration": [
+                              "Areas Related to Circles",
+                              "Surface Areas and Volumes"
+                        ],
+                        "Statistics and Probability": [
+                              "Statistics",
+                              "Probability"
+                        ]
+                  }
+            },
+            "Social Science": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "History": [
+                              "The Rise of Nationalism in Europe",
+                              "Nationalism in India",
+                              "The Making of a Global World",
+                              "The Age of Industrialisation",
+                              "Print Culture and the Modern World"
+                        ],
+                        "Geography": [
+                              "Resources and Development",
+                              "Forest and Wildlife Resources",
+                              "Water Resources",
+                              "Agriculture",
+                              "Minerals and Energy Resources",
+                              "Manufacturing Industries",
+                              "Lifelines of National Economy"
+                        ],
+                        "Political Science": [
+                              "Power Sharing",
+                              "Federalism",
+                              "Gender, Religion and Caste",
+                              "Political Parties",
+                              "Outcomes of Democracy",
+                              "Challenges to Democracy"
+                        ],
+                        "Economics": [
+                              "Development",
+                              "Sectors of the Indian Economy",
+                              "Money and Credit",
+                              "Globalisation and the Indian Economy",
+                              "Consumer Rights"
+                        ]
+                  }
+            },
+            "English": {
+                  "hierarchy": "books_to_chapters",
+                  "books": {
+                        "First Flight": [
+                              "A Letter to God",
+                              "Nelson Mandela: Long Walk to Freedom",
+                              "Two Stories about Flying",
+                              "From the Diary of Anne Frank",
+                              "Glimpses of India",
+                              "Mijbil the Otter",
+                              "Madam Rides the Bus",
+                              "The Sermon at Benares",
+                              "The Proposal",
+                              "Dust of Snow",
+                              "Fire and Ice",
+                              "A Tiger in the Zoo",
+                              "How to Tell Wild Animals",
+                              "The Ball Poem",
+                              "Amanda!",
+                              "The Trees",
+                              "Fog",
+                              "The Tale of Custard the Dragon",
+                              "For Anne Gregory"
+                        ],
+                        "Footprints Without Feet": [
+                              "A Triumph of Surgery",
+                              "The Thief's Story",
+                              "The Midnight Visitor",
+                              "A Question of Trust",
+                              "Footprints without Feet",
+                              "The Making of a Scientist",
+                              "The Necklace",
+                              "Bholi",
+                              "The Book that Saved the Earth"
+                        ]
+                  }
+            },
+            "Hindi": {
+                  "hierarchy": "books_to_chapters",
+                  "books": {
+                        "क्षितिज भाग 2": [
+                              "नेताजी का चश्मा",
+                              "बालगोबिन भगत",
+                              "लखनवी अंदाज़",
+                              "मानवीय करुणा की दिव्य चमक",
+                              "एक कहानी यह भी",
+                              "स्त्री शिक्षा के विरोधी कुतर्कों का खंडन",
+                              "नमक का दारोगा",
+                              "संस्कृति",
+                              "पद (सूरदास)",
+                              "राम-लक्ष्मण-परशुराम संवाद",
+                              "सवैया एवं कवित्त",
+                              "आत्मकथ्य",
+                              "उत्साह एवं अट नहीं रही",
+                              "कर चले हम फ़िदा",
+                              "आत्मत्राण"
+                        ],
+                        "कृतिका भाग 2": [
+                              "माता का अँचल",
+                              "जॉर्ज पंचम की नाक",
+                              "साना-साना हाथ जोड़ि",
+                              "एही ठैयाँ झुलनी हेरानी हो रामा",
+                              "मैं क्यों लिखता हूँ"
+                        ]
+                  }
+            },
+            "Marathi": {
+                  "hierarchy": "books_to_chapters",
+                  "books": {
+                        "मराठी पाठ्यपुस्तक": [
+                              "कथा – आकलन व रसग्रहण",
+                              "ललित निबंध",
+                              "व्यक्तिचित्रण",
+                              "प्रवासवर्णन",
+                              "कविता – रसग्रहण",
+                              "कवितेतील अलंकार व वृत्त"
+                        ],
+                        "मराठी भाषा व उपयोजित लेखन": [
+                              "शब्दभेद",
+                              "समास",
+                              "अलंकार",
+                              "वाक्यरूपांतर",
+                              "वाक्यशुद्धी",
+                              "पत्रलेखन",
+                              "निबंधलेखन",
+                              "संवादलेखन",
+                              "जाहिरात लेखन",
+                              "अहवाल लेखन"
+                        ]
+                  }
+            },
+            "Computer Applications": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Programming": [
+                              "Python Revision",
+                              "Working with Functions",
+                              "File Handling",
+                              "Exception Handling"
+                        ],
+                        "Database": [
+                              "Introduction to MySQL",
+                              "SQL Commands – DDL and DML",
+                              "Queries",
+                              "Joins"
+                        ],
+                        "Networking": [
+                              "Network Concepts",
+                              "Network Devices",
+                              "Network Topologies",
+                              "Internet Services"
+                        ],
+                        "Society, Law and Ethics": [
+                              "Digital Footprint",
+                              "Netiquettes",
+                              "Data Protection",
+                              "Cyber Crime",
+                              "IT Act"
+                        ]
+                  }
+            }
       },
-      'Class 11': {
-        'Physics': {
-          'Mechanics': ['Units & Measurements', 'Motion in a Straight Line', 'Laws of Motion', 'Work, Energy & Power', 'Gravitation'],
-          'Properties of Matter': ['Mechanical Properties of Fluids', 'Thermal Properties', 'Thermodynamics', 'Kinetic Theory'],
-          'Oscillations & Waves': ['Oscillations', 'Waves']
-        },
-        'Chemistry': {
-          'Physical Chemistry': ['Some Basic Concepts', 'Structure of Atom', 'Chemical Bonding', 'Thermodynamics', 'Equilibrium'],
-          'Inorganic Chemistry': ['Hydrogen', 's-Block Elements', 'p-Block Elements'],
-          'Organic Chemistry': ['Organic Chemistry – Basic Principles', 'Hydrocarbons', 'Environmental Chemistry']
-        },
-        'Biology': {
-          'Diversity in Living World': ['The Living World', 'Biological Classification', 'Plant Kingdom', 'Animal Kingdom'],
-          'Cell Biology': ['Cell – The Unit of Life', 'Biomolecules', 'Cell Cycle & Cell Division'],
-          'Plant Physiology': ['Transport in Plants', 'Photosynthesis', 'Respiration in Plants'],
-          'Human Physiology': ['Digestion & Absorption', 'Breathing', 'Body Fluids & Circulation', 'Neural Control']
-        },
-        'Mathematics': {
-          'Sets & Functions': ['Sets', 'Relations & Functions', 'Trigonometric Functions'],
-          'Algebra': ['Complex Numbers', 'Permutations & Combinations', 'Binomial Theorem', 'Sequences & Series'],
-          'Coordinate Geometry': ['Straight Lines', 'Conic Sections', 'Introduction to 3D Geometry'],
-          'Calculus': ['Limits & Derivatives'],
-          'Statistics & Probability': ['Statistics', 'Probability']
-        },
-        'English': {
-          'Reading & Writing': ['Unseen Passages', 'Note Making', 'Notice', 'Article Writing', 'Speech Writing'],
-          'Hornbill': ['The Portrait of a Lady', 'Discovering Tut', 'The Ailing Planet', 'The Adventure'],
-          'Snapshots': ['The Summer of the Beautiful White Horse', 'The Address', 'Ranga’s Marriage']
-        },
-        'Accountancy': {
-          'Theory Base of Accounting': ['Introduction to Accounting', 'Recording of Transactions I', 'Recording of Transactions II'],
-          'Financial Statements': ['Bank Reconciliation Statement', 'Trial Balance', 'Depreciation', 'Bills of Exchange']
-        },
-        'Business Studies': {
-          'Nature of Business': ['Business, Trade & Commerce', 'Forms of Business Organisation', 'Business Services'],
-          'Business Environment': ['Social Responsibility', 'Sources of Business Finance', 'Internal Trade', 'International Business']
-        },
-        'Economics': {
-          'Statistics for Economics': ['Collection of Data', 'Presentation of Data', 'Central Tendency', 'Correlation'],
-          'Indian Economic Development': ['Indian Economy 1950–1990', 'Liberalisation', 'Poverty', 'Employment']
-        },
-        'History': { 'World History': ['From the Beginning of Time', 'Writing and City Life', 'Nomadic Empires', 'The Industrial Revolution'] },
-        'Political Science': { 'Constitution & Theory': ['Constitution – Why and How', 'Rights', 'Executive', 'Legislature', 'Freedom', 'Equality'] },
-        'Geography': { 'Physical & Indian Geography': ['Origin of the Earth', 'Landforms', 'Climate', 'India – Physiography', 'Drainage System'] },
-        'Sociology': { 'Society & Institutions': ['Sociology and Society', 'Social Institutions', 'Culture and Socialisation', 'Social Structure'] },
-        'Psychology': { 'Basic Processes': ['What is Psychology', 'Methods of Enquiry', 'Human Development', 'Learning', 'Memory'] },
-        'Computer Science': { 'Programming & Database': ['Python Basics', 'File Handling', 'MySQL Basics', 'SQL Queries', 'Network Concepts'] }
+      "Class 11": {
+            "Physics": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Mechanics": [
+                              "Physical World and Measurement",
+                              "Units and Measurements",
+                              "Motion in a Straight Line",
+                              "Motion in a Plane",
+                              "Laws of Motion",
+                              "Work, Energy and Power",
+                              "System of Particles and Rotational Motion",
+                              "Gravitation"
+                        ],
+                        "Properties of Matter": [
+                              "Mechanical Properties of Solids",
+                              "Mechanical Properties of Fluids",
+                              "Thermal Properties of Matter",
+                              "Thermodynamics",
+                              "Kinetic Theory"
+                        ],
+                        "Oscillations and Waves": [
+                              "Oscillations",
+                              "Waves"
+                        ]
+                  }
+            },
+            "Chemistry": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Physical Chemistry": [
+                              "Some Basic Concepts of Chemistry",
+                              "Structure of Atom",
+                              "Classification of Elements and Periodicity",
+                              "Chemical Bonding and Molecular Structure",
+                              "Thermodynamics",
+                              "Equilibrium",
+                              "Redox Reactions"
+                        ],
+                        "Inorganic Chemistry": [
+                              "Hydrogen",
+                              "s-Block Elements",
+                              "p-Block Elements"
+                        ],
+                        "Organic Chemistry": [
+                              "Organic Chemistry – Basic Principles and Techniques",
+                              "Hydrocarbons",
+                              "Environmental Chemistry"
+                        ]
+                  }
+            },
+            "Biology": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Diversity in Living World": [
+                              "The Living World",
+                              "Biological Classification",
+                              "Plant Kingdom",
+                              "Animal Kingdom"
+                        ],
+                        "Structural Organisation in Plants and Animals": [
+                              "Morphology of Flowering Plants",
+                              "Anatomy of Flowering Plants",
+                              "Structural Organisation in Animals"
+                        ],
+                        "Cell Biology": [
+                              "Cell – The Unit of Life",
+                              "Biomolecules",
+                              "Cell Cycle and Cell Division"
+                        ],
+                        "Plant Physiology": [
+                              "Transport in Plants",
+                              "Mineral Nutrition",
+                              "Photosynthesis in Higher Plants",
+                              "Respiration in Plants",
+                              "Plant Growth and Development"
+                        ],
+                        "Human Physiology": [
+                              "Digestion and Absorption",
+                              "Breathing and Exchange of Gases",
+                              "Body Fluids and Circulation",
+                              "Excretory Products and their Elimination",
+                              "Locomotion and Movement",
+                              "Neural Control and Coordination",
+                              "Chemical Coordination and Integration"
+                        ]
+                  }
+            },
+            "Mathematics": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Sets and Functions": [
+                              "Sets",
+                              "Relations and Functions",
+                              "Trigonometric Functions"
+                        ],
+                        "Algebra": [
+                              "Complex Numbers and Quadratic Equations",
+                              "Linear Inequalities",
+                              "Permutations and Combinations",
+                              "Binomial Theorem",
+                              "Sequences and Series"
+                        ],
+                        "Coordinate Geometry": [
+                              "Straight Lines",
+                              "Conic Sections",
+                              "Introduction to Three Dimensional Geometry"
+                        ],
+                        "Calculus": [
+                              "Limits and Derivatives"
+                        ],
+                        "Statistics and Probability": [
+                              "Statistics",
+                              "Probability"
+                        ]
+                  }
+            },
+            "English": {
+                  "hierarchy": "books_to_chapters",
+                  "books": {
+                        "Hornbill": [
+                              "The Portrait of a Lady",
+                              "A Photograph",
+                              "We’re Not Afraid to Die… if We Can All Be Together",
+                              "Discovering Tut: The Saga Continues",
+                              "The Laburnum Top",
+                              "The Voice of the Rain",
+                              "Childhood",
+                              "The Adventure",
+                              "Silk Road",
+                              "Father to Son"
+                        ],
+                        "Snapshots": [
+                              "The Summer of the Beautiful White Horse",
+                              "The Address",
+                              "Ranga's Marriage",
+                              "Albert Einstein at School",
+                              "Mother's Day",
+                              "The Ghat of the Only World",
+                              "Birth",
+                              "The Tale of Melon City"
+                        ]
+                  }
+            },
+            "Hindi": {
+                  "hierarchy": "books_to_chapters",
+                  "books": {
+                        "आरोह भाग 1": [
+                              "नमक का दारोगा",
+                              "मियाँ नसीरुद्दीन",
+                              "अपू के साथ ढाई साल",
+                              "विदाई-संभाषण",
+                              "गलता लोहा",
+                              "स्पीति में बारिश",
+                              "कबीर के पद",
+                              "मीरा के पद",
+                              "घर की याद",
+                              "चंपा काले काले अक्षर नहीं चीन्हती",
+                              "ग़ज़ल",
+                              "हे भूख मत मचल",
+                              "सबसे खतरनाक",
+                              "आओ मिलकर बचाएँ"
+                        ],
+                        "वितान भाग 1": [
+                              "भारतीय गायिकाओं में बेजोड़: लता मंगेशकर",
+                              "राजस्थान की रजत बूँदें",
+                              "आलो-आँधारि"
+                        ]
+                  }
+            },
+            "Computer Science": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Programming in Python": [
+                              "Python Basics",
+                              "Control Flow",
+                              "Functions",
+                              "Strings and Lists",
+                              "File Handling"
+                        ],
+                        "Data Handling": [
+                              "Pandas",
+                              "Matplotlib"
+                        ],
+                        "Database and Networks": [
+                              "MySQL Basics",
+                              "SQL Queries",
+                              "Network Concepts",
+                              "Cyber Safety"
+                        ]
+                  }
+            },
+            "Accountancy": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Theory Base of Accounting": [
+                              "Introduction to Accounting",
+                              "Theory Base of Accounting",
+                              "Recording of Transactions I",
+                              "Recording of Transactions II"
+                        ],
+                        "Bank Reconciliation and Trial Balance": [
+                              "Bank Reconciliation Statement",
+                              "Trial Balance and Rectification of Errors"
+                        ],
+                        "Financial Statements": [
+                              "Depreciation, Provisions and Reserves",
+                              "Bills of Exchange",
+                              "Financial Statements I",
+                              "Financial Statements II"
+                        ],
+                        "Computerised Accounting": [
+                              "Computerised Accounting System",
+                              "Accounting Information Systems",
+                              "Spreadsheet for Accounting"
+                        ]
+                  }
+            },
+            "Business Studies": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Nature and Purpose of Business": [
+                              "Business, Trade and Commerce",
+                              "Forms of Business Organisation",
+                              "Private, Public and Global Enterprises",
+                              "Business Services",
+                              "Emerging Modes of Business"
+                        ],
+                        "Business Finance and Trade": [
+                              "Social Responsibility of Business",
+                              "Formation of a Company",
+                              "Sources of Business Finance",
+                              "Small Business",
+                              "Internal Trade",
+                              "International Business"
+                        ]
+                  }
+            },
+            "Economics": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Statistics for Economics": [
+                              "Introduction",
+                              "Collection of Data",
+                              "Organisation of Data",
+                              "Presentation of Data",
+                              "Measures of Central Tendency",
+                              "Measures of Dispersion",
+                              "Correlation",
+                              "Index Numbers"
+                        ],
+                        "Indian Economic Development": [
+                              "Indian Economy on the Eve of Independence",
+                              "Indian Economy 1950–1990",
+                              "Liberalisation, Privatisation and Globalisation",
+                              "Poverty",
+                              "Human Capital Formation",
+                              "Rural Development",
+                              "Employment",
+                              "Infrastructure",
+                              "Environment and Sustainable Development"
+                        ]
+                  }
+            },
+            "History": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Early Societies": [
+                              "From the Beginning of Time",
+                              "Writing and City Life"
+                        ],
+                        "Empires and Cultures": [
+                              "An Empire Across Three Continents",
+                              "The Central Islamic Lands",
+                              "Nomadic Empires",
+                              "The Three Orders",
+                              "Changing Cultural Traditions",
+                              "Confrontation of Cultures"
+                        ],
+                        "Towards Modernity": [
+                              "The Industrial Revolution",
+                              "Displacing Indigenous Peoples",
+                              "Paths to Modernisation"
+                        ]
+                  }
+            },
+            "Political Science": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Indian Constitution at Work": [
+                              "Constitution – Why and How",
+                              "Rights in the Indian Constitution",
+                              "Election and Representation",
+                              "Executive",
+                              "Legislature",
+                              "Judiciary",
+                              "Federalism",
+                              "Local Governments",
+                              "Constitution as a Living Document"
+                        ],
+                        "Political Theory": [
+                              "Political Theory – Introduction",
+                              "Freedom",
+                              "Equality",
+                              "Social Justice",
+                              "Rights",
+                              "Citizenship",
+                              "Nationalism",
+                              "Secularism",
+                              "Peace",
+                              "Development"
+                        ]
+                  }
+            },
+            "Geography": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Fundamentals of Physical Geography": [
+                              "Geography as a Discipline",
+                              "Origin and Evolution of the Earth",
+                              "Interior of the Earth",
+                              "Landforms",
+                              "Climate",
+                              "Water (Oceans)",
+                              "Life on Earth"
+                        ],
+                        "India – Physical Environment": [
+                              "India – Location",
+                              "Structure and Physiography",
+                              "Drainage System",
+                              "Climate",
+                              "Natural Vegetation",
+                              "Soils",
+                              "Natural Hazards and Disasters"
+                        ]
+                  }
+            },
+            "Sociology": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Introducing Sociology": [
+                              "Sociology and Society",
+                              "Terms, Concepts and their Use",
+                              "Understanding Social Institutions",
+                              "Culture and Socialisation",
+                              "Doing Sociology"
+                        ],
+                        "Understanding Society": [
+                              "Social Structure, Stratification and Social Processes",
+                              "Social Change and Social Order",
+                              "Environment and Society",
+                              "Introducing Western Sociologists"
+                        ]
+                  }
+            },
+            "Psychology": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Introduction and Basic Processes": [
+                              "What is Psychology",
+                              "Methods of Enquiry",
+                              "Biological Bases of Behaviour",
+                              "Human Development",
+                              "Sensory, Attentional and Perceptual Processes",
+                              "Learning"
+                        ],
+                        "Higher Mental Processes": [
+                              "Memory",
+                              "Thinking",
+                              "Motivation and Emotion"
+                        ]
+                  }
+            }
       },
-      'Class 12': {
-        'Physics': {
-          'Electromagnetism': ['Electric Charges & Fields', 'Current Electricity', 'Moving Charges & Magnetism', 'Electromagnetic Induction', 'Alternating Current'],
-          'Optics': ['Ray Optics & Optical Instruments', 'Wave Optics'],
-          'Modern Physics': ['Dual Nature of Radiation & Matter', 'Atoms', 'Nuclei', 'Semiconductor Electronics']
-        },
-        'Chemistry': {
-          'Physical Chemistry': ['Solid State', 'Solutions', 'Electrochemistry', 'Chemical Kinetics', 'Surface Chemistry'],
-          'Inorganic Chemistry': ['p-Block Elements', 'd & f Block Elements', 'Coordination Compounds'],
-          'Organic Chemistry': ['Haloalkanes & Haloarenes', 'Alcohols, Phenols & Ethers', 'Aldehydes, Ketones & Acids', 'Amines', 'Biomolecules']
-        },
-        'Biology': {
-          'Reproduction': ['Reproduction in Organisms', 'Sexual Reproduction in Flowering Plants', 'Human Reproduction', 'Reproductive Health'],
-          'Genetics & Evolution': ['Principles of Inheritance', 'Molecular Basis of Inheritance', 'Evolution'],
-          'Biotechnology': ['Biotechnology – Principles & Processes', 'Biotechnology & its Applications'],
-          'Ecology': ['Organisms & Populations', 'Ecosystem', 'Biodiversity & Conservation', 'Environmental Issues']
-        },
-        'Mathematics': {
-          'Relations & Functions': ['Relations & Functions', 'Inverse Trigonometric Functions'],
-          'Algebra': ['Matrices', 'Determinants'],
-          'Calculus': ['Continuity & Differentiability', 'Applications of Derivatives', 'Integrals', 'Differential Equations'],
-          'Vectors & 3D Geometry': ['Vector Algebra', 'Three Dimensional Geometry'],
-          'Probability': ['Probability']
-        },
-        'English': {
-          'Reading & Writing': ['Unseen Passages', 'Note Making & Summary', 'Notice', 'Report Writing', 'Article Writing'],
-          'Flamingo': ['The Last Lesson', 'Lost Spring', 'Deep Water', 'Indigo', 'Going Places'],
-          'Vistas': ['The Third Level', 'The Tiger King', 'The Enemy', 'On the Face of It']
-        },
-        'Accountancy': {
-          'Partnership Accounts': ['Basic Concepts', 'Admission of a Partner', 'Retirement / Death of a Partner', 'Dissolution'],
-          'Company Accounts': ['Share Capital', 'Issue and Redemption of Debentures'],
-          'Financial Statement Analysis': ['Financial Statements', 'Accounting Ratios', 'Cash Flow Statement']
-        },
-        'Business Studies': {
-          'Management': ['Nature of Management', 'Principles of Management', 'Business Environment', 'Planning', 'Organising'],
-          'Finance & Marketing': ['Financial Management', 'Financial Markets', 'Marketing Management', 'Consumer Protection']
-        },
-        'Economics': {
-          'Microeconomics': ['Consumer Behaviour', 'Production and Costs', 'Market Equilibrium', 'Non-Competitive Markets'],
-          'Macroeconomics': ['National Income', 'Money and Banking', 'Income & Employment', 'Government Budget', 'Balance of Payments']
-        },
-        'History': { 'Themes in Indian History': ['Harappan Civilisation', 'Kings, Farmers & Towns', 'Bhakti-Sufi Traditions', 'Mahatma Gandhi', 'Framing the Constitution'] },
-        'Political Science': { 'World Politics & India': ['The Cold War Era', 'US Hegemony', 'International Organisations', 'Challenges of Nation Building', 'Regional Aspirations'] },
-        'Geography': { 'Human Geography & India': ['Population', 'Human Development', 'Primary Activities', 'International Trade', 'Resources & Agriculture'] },
-        'Sociology': { 'Indian Society': ['Social Institutions', 'Diversity and Inequality', 'Rural Transformation', 'Globalisation and Social Change'] },
-        'Psychology': { 'Individual & Society': ['Self and Personality', 'Psychological Disorders', 'Therapeutic Approaches', 'Social Influence'] },
-        'Computer Science': { 'Programming & Database': ['Python Advanced', 'Pandas', 'Data Visualisation', 'MySQL Advanced', 'Network Security'] }
+      "Class 12": {
+            "Physics": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Electrostatics and Current Electricity": [
+                              "Electric Charges and Fields",
+                              "Electrostatic Potential and Capacitance",
+                              "Current Electricity"
+                        ],
+                        "Magnetism and Electromagnetic Induction": [
+                              "Moving Charges and Magnetism",
+                              "Magnetism and Matter",
+                              "Electromagnetic Induction",
+                              "Alternating Current",
+                              "Electromagnetic Waves"
+                        ],
+                        "Optics": [
+                              "Ray Optics and Optical Instruments",
+                              "Wave Optics"
+                        ],
+                        "Modern Physics and Electronics": [
+                              "Dual Nature of Radiation and Matter",
+                              "Atoms",
+                              "Nuclei",
+                              "Semiconductor Electronics"
+                        ]
+                  }
+            },
+            "Chemistry": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Physical Chemistry": [
+                              "Solutions",
+                              "Electrochemistry",
+                              "Chemical Kinetics"
+                        ],
+                        "Inorganic Chemistry": [
+                              "d- and f-Block Elements",
+                              "Coordination Compounds"
+                        ],
+                        "Organic Chemistry": [
+                              "Haloalkanes and Haloarenes",
+                              "Alcohols, Phenols and Ethers",
+                              "Aldehydes, Ketones and Carboxylic Acids",
+                              "Amines",
+                              "Biomolecules"
+                        ]
+                  }
+            },
+            "Biology": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Reproduction": [
+                              "Sexual Reproduction in Flowering Plants",
+                              "Human Reproduction",
+                              "Reproductive Health"
+                        ],
+                        "Genetics and Evolution": [
+                              "Principles of Inheritance and Variation",
+                              "Molecular Basis of Inheritance",
+                              "Evolution"
+                        ],
+                        "Biology and Human Welfare": [
+                              "Human Health and Disease",
+                              "Microbes in Human Welfare"
+                        ],
+                        "Biotechnology": [
+                              "Biotechnology – Principles and Processes",
+                              "Biotechnology and its Applications"
+                        ],
+                        "Ecology and Environment": [
+                              "Organisms and Populations",
+                              "Ecosystem",
+                              "Biodiversity and Conservation",
+                              "Environmental Issues"
+                        ]
+                  }
+            },
+            "Mathematics": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Relations and Functions": [
+                              "Relations and Functions",
+                              "Inverse Trigonometric Functions"
+                        ],
+                        "Algebra": [
+                              "Matrices",
+                              "Determinants"
+                        ],
+                        "Calculus": [
+                              "Continuity and Differentiability",
+                              "Applications of Derivatives",
+                              "Integrals",
+                              "Applications of Integrals",
+                              "Differential Equations"
+                        ],
+                        "Vectors and 3D Geometry": [
+                              "Vector Algebra",
+                              "Three Dimensional Geometry"
+                        ],
+                        "Linear Programming and Probability": [
+                              "Linear Programming",
+                              "Probability"
+                        ]
+                  }
+            },
+            "English": {
+                  "hierarchy": "books_to_chapters",
+                  "books": {
+                        "Flamingo": [
+                              "The Last Lesson",
+                              "Lost Spring",
+                              "Deep Water",
+                              "The Rattrap",
+                              "Indigo",
+                              "Poets and Pancakes",
+                              "The Interview",
+                              "Going Places",
+                              "My Mother at Sixty-Six",
+                              "Keeping Quiet",
+                              "A Thing of Beauty",
+                              "A Roadside Stand",
+                              "Aunt Jennifer’s Tigers"
+                        ],
+                        "Vistas": [
+                              "The Third Level",
+                              "The Tiger King",
+                              "Journey to the End of the Earth",
+                              "The Enemy",
+                              "On the Face of It",
+                              "Memories of Childhood"
+                        ]
+                  }
+            },
+            "Hindi": {
+                  "hierarchy": "books_to_chapters",
+                  "books": {
+                        "आरोह भाग 2": [
+                              "भक्तिन",
+                              "बाजार दर्शन",
+                              "काले मेघा पानी दे",
+                              "पहलवान की ढोलक",
+                              "शिरीष के फूल",
+                              "श्रम विभाजन और जाति-प्रथा",
+                              "कविता के बहाने",
+                              "बात सीधी थी पर",
+                              "कैमरे में बंद अपाहिज",
+                              "सहर्ष स्वीकारा है",
+                              "उषा",
+                              "बादल राग",
+                              "रुबाइयाँ",
+                              "छोटे मेरे खेत",
+                              "बगुलों के पंख"
+                        ],
+                        "वितान भाग 2": [
+                              "सिल्वर वैडिंग",
+                              "जूझ",
+                              "अतीत में दबे पाँव",
+                              "डायरी के पन्ने"
+                        ]
+                  }
+            },
+            "Computer Science": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Programming and Data Handling": [
+                              "Python Advanced",
+                              "Pandas Advanced",
+                              "Data Visualisation",
+                              "File Handling Advanced"
+                        ],
+                        "Database Management": [
+                              "MySQL Advanced",
+                              "Views and Stored Procedures",
+                              "Python–MySQL Connectivity"
+                        ],
+                        "Computer Networks and Society": [
+                              "Internet Basics",
+                              "Network Security",
+                              "Open Source Concepts",
+                              "Societal Impact"
+                        ]
+                  }
+            },
+            "Accountancy": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Partnership Accounts": [
+                              "Accounting for Partnership – Basic Concepts",
+                              "Admission of a Partner",
+                              "Retirement / Death of a Partner",
+                              "Dissolution of Partnership Firm"
+                        ],
+                        "Company Accounts": [
+                              "Accounting for Share Capital",
+                              "Issue and Redemption of Debentures"
+                        ],
+                        "Financial Statement Analysis": [
+                              "Financial Statements of a Company",
+                              "Analysis of Financial Statements",
+                              "Accounting Ratios",
+                              "Cash Flow Statement"
+                        ]
+                  }
+            },
+            "Business Studies": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Principles and Functions of Management": [
+                              "Nature and Significance of Management",
+                              "Principles of Management",
+                              "Business Environment",
+                              "Planning",
+                              "Organising",
+                              "Staffing",
+                              "Directing",
+                              "Controlling"
+                        ],
+                        "Business Finance and Marketing": [
+                              "Financial Management",
+                              "Financial Markets",
+                              "Marketing Management",
+                              "Consumer Protection"
+                        ]
+                  }
+            },
+            "Economics": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Microeconomics": [
+                              "Introduction to Microeconomics",
+                              "Theory of Consumer Behaviour",
+                              "Production and Costs",
+                              "Theory of the Firm under Perfect Competition",
+                              "Market Equilibrium",
+                              "Non-Competitive Markets"
+                        ],
+                        "Macroeconomics": [
+                              "National Income Accounting",
+                              "Money and Banking",
+                              "Determination of Income and Employment",
+                              "Government Budget and the Economy",
+                              "Balance of Payments"
+                        ]
+                  }
+            },
+            "History": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Themes in Indian History I": [
+                              "Bricks, Beads and Bones – Harappan Civilisation",
+                              "Kings, Farmers and Towns",
+                              "Kinship, Caste and Class"
+                        ],
+                        "Themes in Indian History II": [
+                              "Thinkers, Beliefs and Buildings",
+                              "Through the Eyes of Travellers",
+                              "Bhakti-Sufi Traditions",
+                              "An Imperial Capital – Vijayanagara",
+                              "Peasants, Zamindars and the State",
+                              "Kings and Chronicles – the Mughal Courts"
+                        ],
+                        "Themes in Indian History III": [
+                              "Colonialism and the Countryside",
+                              "Rebels and the Raj – 1857",
+                              "Colonial Cities",
+                              "Mahatma Gandhi and the Nationalist Movement",
+                              "Understanding Partition",
+                              "Framing the Constitution"
+                        ]
+                  }
+            },
+            "Political Science": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Contemporary World Politics": [
+                              "The Cold War Era",
+                              "End of Bipolarity",
+                              "US Hegemony in World Politics",
+                              "Alternative Centres of Power",
+                              "Contemporary South Asia",
+                              "International Organisations",
+                              "Security in the Contemporary World",
+                              "Environment and Natural Resources",
+                              "Globalisation"
+                        ],
+                        "Politics in India Since Independence": [
+                              "Challenges of Nation Building",
+                              "Era of One-Party Dominance",
+                              "Politics of Planned Development",
+                              "India's External Relations",
+                              "Challenges to and Restoration of the Congress System",
+                              "Crisis of the Democratic Order",
+                              "Regional Aspirations",
+                              "Recent Developments in Indian Politics"
+                        ]
+                  }
+            },
+            "Geography": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Fundamentals of Human Geography": [
+                              "Human Geography – Nature and Scope",
+                              "World Population – Distribution, Density and Growth",
+                              "Population Composition",
+                              "Human Development",
+                              "Primary Activities",
+                              "Secondary Activities",
+                              "Tertiary and Quaternary Activities",
+                              "Transport and Communication",
+                              "International Trade",
+                              "Human Settlements"
+                        ],
+                        "India – People and Economy": [
+                              "Population – Distribution, Density and Growth",
+                              "Migration",
+                              "Human Development in India",
+                              "Human Settlements",
+                              "Land Resources and Agriculture",
+                              "Water Resources",
+                              "Mineral and Energy Resources",
+                              "Manufacturing Industries",
+                              "Planning and Sustainable Development",
+                              "Transport and Communication",
+                              "Geographical Perspective on Selected Issues"
+                        ]
+                  }
+            },
+            "Sociology": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Indian Society": [
+                              "Introducing Indian Society",
+                              "Social Institutions – Continuity and Change",
+                              "Demographic Structure of Indian Society",
+                              "Diversity and Inequality",
+                              "Social Change",
+                              "Rural and Agrarian Transformation",
+                              "Industrial Society"
+                        ],
+                        "Social Change and Development in India": [
+                              "Structural Change",
+                              "Cultural Change",
+                              "The Story of Indian Democracy",
+                              "Change and Development in Rural Society",
+                              "Change and Development in Industrial Society",
+                              "Globalisation and Social Change",
+                              "Mass Media and Communications",
+                              "Social Movements"
+                        ]
+                  }
+            },
+            "Psychology": {
+                  "hierarchy": "units_to_chapters",
+                  "groups": {
+                        "Individual Differences and Self": [
+                              "Variations in Psychological Attributes",
+                              "Self and Personality"
+                        ],
+                        "Disorders and Society": [
+                              "Meeting Life Challenges",
+                              "Psychological Disorders",
+                              "Therapeutic Approaches",
+                              "Attitude and Social Cognition",
+                              "Social Influence and Group Processes",
+                              "Developing Psychological Skills"
+                        ]
+                  }
+            }
       }
-    };
+};
 
     const ONLINE_WEBHOOK = 'https://n8n.mytst.cloud/webhook/c12174e9-3bdd-4a62-bca0-9df11d65d31e';
 
@@ -743,8 +1629,9 @@
       testType: 'online',
       className: '',
       subject: '',
+      book: '',
       maximumMarks: '',
-      // For Class 11–12 these are real syllabus Units. Chapters are stored separately.
+      // Units and Chapters are stored separately for every unit-based subject.
       units: [],
       chapters: [],
       topics: [],
@@ -764,7 +1651,7 @@
       const normalized = (subject || '').toLowerCase();
       if (['mathematics', 'physics', 'chemistry'].includes(normalized)) return ['MCQ', 'Assertion–Reason', 'Very Short Answer', 'Short Answer', 'Long Answer', 'Numerical / Problem-Solving', 'Case-Based', 'Mixed (All Types)'];
       if (normalized === 'biology') return ['MCQ', 'Assertion–Reason', 'Very Short Answer', 'Short Answer', 'Long Answer', 'Diagram-Based', 'Case-Based', 'Mixed (All Types)'];
-      if (['english', 'hindi'].includes(normalized)) return ['MCQ', 'Passage / Comprehension-Based', 'Grammar-Based', 'Very Short Answer', 'Short Answer', 'Long Answer / Essay', 'Literary / Extract-Based', 'Letter / Application Writing', 'Mixed (All Types)'];
+      if (['english', 'hindi', 'marathi'].includes(normalized)) return ['MCQ', 'Passage / Comprehension-Based', 'Grammar-Based', 'Very Short Answer', 'Short Answer', 'Long Answer / Essay', 'Literary / Extract-Based', 'Letter / Application Writing', 'Mixed (All Types)'];
       if (normalized === 'social science' || normalized === 'history' || normalized === 'political science') return ['MCQ', 'Assertion–Reason', 'Source-Based', 'Very Short Answer', 'Short Answer', 'Long Answer', 'Mixed (All Types)'];
       if (normalized === 'geography') return ['MCQ', 'Assertion–Reason', 'Map-Based', 'Very Short Answer', 'Short Answer', 'Long Answer', 'Mixed (All Types)'];
       if (normalized === 'accountancy' || normalized === 'economics') return ['MCQ', 'Numerical / Problem-Solving', 'Assertion–Reason', 'Very Short Answer', 'Short Answer', 'Long Answer', 'Case-Based', 'Mixed (All Types)'];
@@ -772,26 +1659,40 @@
       return ['MCQ', 'Assertion–Reason', 'Very Short Answer', 'Short Answer', 'Long Answer', 'Case-Based', 'Mixed (All Types)'];
     }
 
+    function getSubjectConfig() {
+      return SYLLABUS[state.className]?.[state.subject] || null;
+    }
+    function getHierarchy() {
+      return getSubjectConfig()?.hierarchy || 'units_to_chapters';
+    }
     function usesUnitChapterHierarchy() {
-      return state.className === 'Class 11' || state.className === 'Class 12';
+      return !!getSubjectConfig() && getHierarchy() === 'units_to_chapters';
+    }
+    function usesBookChapterHierarchy() {
+      return !!getSubjectConfig() && getHierarchy() === 'books_to_chapters';
+    }
+    function usesChapterTopicHierarchy() {
+      return !!getSubjectConfig() && getHierarchy() === 'chapters_to_topics';
+    }
+    function selectedBookOptions() {
+      const config = getSubjectConfig();
+      return usesBookChapterHierarchy() ? Object.keys(config?.books || {}) : [];
     }
     function selectedUnitOptions() {
-      if (!state.className || !state.subject) return [];
-      return Object.keys(SYLLABUS[state.className]?.[state.subject] || {});
+      const config = getSubjectConfig();
+      return usesUnitChapterHierarchy() ? Object.keys(config?.groups || {}) : [];
     }
     function selectedChapterOptions() {
-      if (!state.className || !state.subject) return [];
-      const subjectData = SYLLABUS[state.className]?.[state.subject] || {};
-      // Class 10 keys are Chapters. Class 11–12 keys are Units and their
-      // child values are the actual Chapter names.
-      return usesUnitChapterHierarchy()
-        ? state.units.flatMap((unit) => subjectData[unit] || [])
-        : Object.keys(subjectData);
+      const config = getSubjectConfig();
+      if (!config) return [];
+      if (usesBookChapterHierarchy()) return config.books?.[state.book] || [];
+      if (usesUnitChapterHierarchy()) return state.units.flatMap((unit) => config.groups?.[unit] || []);
+      return Object.keys(config.groups || {});
     }
     function selectedTopicOptions() {
-      if (!state.className || !state.subject || usesUnitChapterHierarchy()) return [];
-      const subjectData = SYLLABUS[state.className]?.[state.subject] || {};
-      return state.chapters.flatMap((chapter) => subjectData[chapter] || []);
+      const config = getSubjectConfig();
+      if (!config || !usesChapterTopicHierarchy()) return [];
+      return state.chapters.flatMap((chapter) => config.groups?.[chapter] || []);
     }
     function chapterNoun(count = 2) { return count === 1 ? 'chapter' : 'chapters'; }
     function currentMarkRule() {
@@ -806,6 +1707,7 @@
     function chapterRuleStatus() {
       const rule = currentMarkRule();
       if (!rule) return '';
+      if (usesBookChapterHierarchy() && !state.book) return 'Select a book name first to unlock its chapter list.';
       if (usesUnitChapterHierarchy() && !state.units.length) return 'Select one or more units first to unlock their chapter names.';
       const count = state.chapters.length;
       if (count < rule.min) {
@@ -834,11 +1736,12 @@
       const missing = [];
       if (!state.className) missing.push('class');
       if (!state.subject) missing.push('subject');
+      if (usesBookChapterHierarchy() && !state.book) missing.push('book name');
       if (state.testType === 'offline' && !state.maximumMarks) missing.push('maximum marks');
       if (usesUnitChapterHierarchy() && !state.units.length) missing.push('units');
       if (!state.chapters.length) missing.push('chapters');
       if (state.testType === 'offline' && state.maximumMarks && !chapterRuleIsMet()) missing.push('the chapter selection rule');
-      if (!usesUnitChapterHierarchy() && !state.topics.length) missing.push('topics');
+      if (usesChapterTopicHierarchy() && !state.topics.length) missing.push('topics');
       if (!state.questionTypes.length) missing.push('question type');
       if (!state.difficulty) missing.push('difficulty');
       if (state.testType === 'online' && !state.numberQuestions) missing.push('number of questions');
@@ -880,7 +1783,7 @@
       menu.innerHTML = options.map((option) => {
         const checked = selectedValues.includes(option);
         const optionDisabled = disabled || (!checked && atLimit);
-        const count = showCount ? (SYLLABUS[state.className]?.[state.subject]?.[option] || []).length : null;
+        const count = showCount ? (getSubjectConfig()?.groups?.[option] || []).length : null;
         return `
           <label class="select-option ${checked ? 'selected' : ''} ${optionDisabled ? 'disabled' : ''}">
             <input type="checkbox" data-selection-key="${key}" value="${escapeHTML(option)}" ${checked ? 'checked' : ''} ${optionDisabled ? 'disabled' : ''} />
@@ -895,13 +1798,15 @@
       if (state.testType !== 'offline') {
         ruleContainer.className = 'hint';
         if (!state.subject) ruleContainer.textContent = 'Choose a subject to see available chapters.';
+        else if (usesBookChapterHierarchy() && !state.book) ruleContainer.textContent = 'Select a book name first to reveal its chapters.';
         else if (usesUnitChapterHierarchy() && !state.units.length) ruleContainer.textContent = 'Select one or more units first to reveal their chapters.';
+        else if (usesChapterTopicHierarchy() && !state.chapters.length) ruleContainer.textContent = 'Select one or more chapters first to reveal their topics.';
         else ruleContainer.textContent = 'Select one or more chapters for your paper.';
         return;
       }
       if (!state.maximumMarks) {
         ruleContainer.className = 'rule-helper';
-        ruleContainer.innerHTML = `<span class="rule-icon">ℹ</span><div><strong>Choose maximum marks first</strong><span>Chapter selection is locked until a marks value is selected.</span></div>`;
+        ruleContainer.innerHTML = `<span class="rule-icon">ℹ</span><div><strong>Choose maximum marks before generating</strong><span>You may select chapters now; the marks rule will activate as soon as marks are chosen.</span></div>`;
         return;
       }
       const rule = currentMarkRule();
@@ -913,6 +1818,8 @@
     function renderConfiguration() {
       const classSelect = document.getElementById('classSelect');
       const subjectSelect = document.getElementById('subjectSelect');
+      const booksField = document.getElementById('booksField');
+      const bookSelect = document.getElementById('bookSelect');
       const marksField = document.getElementById('marksField');
       const unitsField = document.getElementById('unitsField');
       const topicsField = document.getElementById('topicsField');
@@ -937,27 +1844,45 @@
       document.getElementById('onlineMode').classList.toggle('selected', state.testType === 'online');
       document.getElementById('offlineMode').classList.toggle('selected', state.testType === 'offline');
 
-      const seniorClass = usesUnitChapterHierarchy();
+      const hierarchy = state.subject ? getHierarchy() : null;
+      const unitBased = hierarchy === 'units_to_chapters';
+      const bookBased = hierarchy === 'books_to_chapters';
+      const topicBased = hierarchy === 'chapters_to_topics';
+      const bookOptions = selectedBookOptions();
       const unitOptions = selectedUnitOptions();
       const chapterOptions = selectedChapterOptions();
       const topicOptions = selectedTopicOptions();
       const questionOptions = state.subject ? getQuestionTypes(state.subject) : [];
-      const markGateLocked = !state.subject || (state.testType === 'offline' && !state.maximumMarks);
-      const unitsLocked = markGateLocked;
-      const chaptersLocked = markGateLocked || (seniorClass && !state.units.length);
+      // Keep scope selectors usable before marks are chosen. Marks are still
+      // required to generate an offline paper and immediately apply the cap.
+      const scopeLocked = !state.subject;
+      const unitsLocked = scopeLocked;
+      const chaptersLocked = scopeLocked || (unitBased && !state.units.length) || (bookBased && !state.book);
       const rule = currentMarkRule();
 
-      // Class 11 / 12 have a real Unit → Chapter hierarchy. Class 10 retains
-      // Chapter → Topic, so there is no separate Unit picker in Class 10.
-      unitsField.classList.toggle('hidden', !seniorClass);
-      topicsField.classList.toggle('hidden', seniorClass);
+      // Every subject declares its own hierarchy in the syllabus schema:
+      // Units → Chapters, Chapters → Topics, or Books → Chapters.
+      booksField.classList.toggle('hidden', !bookBased);
+      unitsField.classList.toggle('hidden', !unitBased);
+      topicsField.classList.toggle('hidden', !topicBased);
+      setOptions(bookSelect, bookOptions, 'Select book name');
+      bookSelect.disabled = !bookBased || !state.subject;
+      bookSelect.value = state.book;
       document.getElementById('chaptersLabel').innerHTML = `Chapters <span class="required">*</span>`;
-      renderTrigger('units', state.units, unitsLocked ? 'Select maximum marks to unlock units…' : 'Select units…', unitsLocked);
-      renderMenu('units', unitOptions, state.units, { disabled: unitsLocked, showCount: true, countLabel: 'chapters' });
-      renderTrigger('chapters', state.chapters, chaptersLocked ? (seniorClass && state.subject && !state.units.length ? 'Select units first…' : 'Select maximum marks to unlock chapters…') : 'Select chapters…', chaptersLocked);
-      renderMenu('chapters', chapterOptions, state.chapters, { disabled: chaptersLocked, maxSelections: rule?.max ?? null, showCount: !seniorClass, countLabel: 'topics' });
-      renderTrigger('topics', state.topics, 'Select topics to include…', !state.chapters.length);
-      renderMenu('topics', topicOptions, state.topics, { disabled: !state.chapters.length });
+
+      renderTrigger('units', state.units, unitBased && !state.subject ? 'Select a subject first…' : 'Select units…', !unitBased || unitsLocked);
+      renderMenu('units', unitOptions, state.units, { disabled: !unitBased || unitsLocked, showCount: true, countLabel: 'chapters' });
+
+      let chapterPlaceholder = 'Select chapters…';
+      if (!state.subject) chapterPlaceholder = 'Select a subject first…';
+      else if (bookBased && !state.book) chapterPlaceholder = 'Select a book name first…';
+      else if (unitBased && !state.units.length) chapterPlaceholder = 'Select units first…';
+      else if (state.testType === 'offline' && !state.maximumMarks) chapterPlaceholder = 'Select chapters (choose marks before generating)…';
+      renderTrigger('chapters', state.chapters, chapterPlaceholder, chaptersLocked);
+      renderMenu('chapters', chapterOptions, state.chapters, { disabled: chaptersLocked, maxSelections: rule?.max ?? null, showCount: topicBased, countLabel: 'topics' });
+
+      renderTrigger('topics', state.topics, 'Select topics to include…', !topicBased || !state.chapters.length);
+      renderMenu('topics', topicOptions, state.topics, { disabled: !topicBased || !state.chapters.length });
       renderTrigger('questionTypes', state.questionTypes, 'Select question type(s)…', !state.subject);
       renderMenu('questionTypes', questionOptions, state.questionTypes, { disabled: !state.subject });
       renderChapterRule();
@@ -1000,8 +1925,9 @@
       if (state.testType === nextType) return;
       state.testType = nextType;
       state.maximumMarks = '';
-      // Do not carry a prior mode's selection into Offline mode: marks must
-      // deliberately be chosen before a fresh Chapters / Units selection.
+      // Start a fresh scope when changing delivery mode so selections stay clear
+      // and the chosen marks rule can be applied predictably.
+      state.book = '';
       state.units = [];
       state.chapters = [];
       state.topics = [];
@@ -1046,18 +1972,36 @@
 
     function toTitle(value) { return String(value).replace(/\w\S*/g, (word) => word.charAt(0).toUpperCase() + word.slice(1)); }
     function buildScopePayload() {
+      if (usesBookChapterHierarchy()) {
+        return {
+          syllabus_hierarchy: 'books_to_chapters',
+          book_name: state.book,
+          book: state.book,
+          units: [],
+          chapters: state.chapters,
+          // Keep actual chapter names in the legacy topics field too, so the
+          // existing webhook remains compatible while it adopts book_name.
+          topics: state.chapters,
+          selected_book: state.book,
+          selected_chapters: state.chapters,
+          selected_topics: state.chapters
+        };
+      }
       if (usesUnitChapterHierarchy()) {
         return {
           syllabus_hierarchy: 'units_to_chapters',
           units: state.units,
           chapters: state.chapters,
-          topics: [],
+          // Backward-compatible alias for existing workflows that read topics.
+          topics: state.chapters,
           selected_units: state.units,
-          selected_chapters: state.chapters
+          selected_chapters: state.chapters,
+          selected_topics: state.chapters
         };
       }
       return {
         syllabus_hierarchy: 'chapters_to_topics',
+        book_name: '',
         units: [],
         chapters: state.chapters,
         topics: state.topics,
@@ -1170,12 +2114,17 @@
     document.getElementById('offlineMode').addEventListener('click', () => setTestType('offline'));
     document.getElementById('classSelect').addEventListener('change', (event) => {
       state.className = event.target.value;
-      state.subject = ''; state.units = []; state.chapters = []; state.topics = []; state.questionTypes = []; state.adjustmentNote = '';
+      state.subject = ''; state.book = ''; state.units = []; state.chapters = []; state.topics = []; state.questionTypes = []; state.adjustmentNote = '';
       closeMenus(); clearError(); renderConfiguration();
     });
     document.getElementById('subjectSelect').addEventListener('change', (event) => {
       state.subject = event.target.value;
-      state.units = []; state.chapters = []; state.topics = []; state.questionTypes = []; state.adjustmentNote = '';
+      state.book = ''; state.units = []; state.chapters = []; state.topics = []; state.questionTypes = []; state.adjustmentNote = '';
+      closeMenus(); clearError(); renderConfiguration();
+    });
+    document.getElementById('bookSelect').addEventListener('change', (event) => {
+      state.book = event.target.value;
+      state.chapters = []; state.topics = []; state.adjustmentNote = '';
       closeMenus(); clearError(); renderConfiguration();
     });
     document.getElementById('marksSelect').addEventListener('change', (event) => {
@@ -1212,5 +2161,5 @@
 
     renderConfiguration();
   </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2a31aad9af974e9',t:'MTc4NjU3NTcxMA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2a3506d092ed23d',t:'MTc4NjU3NzkxMQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
