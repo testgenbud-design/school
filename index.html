@@ -2088,7 +2088,7 @@
       };
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 6 * 60 * 1000);
+        const timeout = setTimeout(() => controller.abort(), 20 * 60 * 1000);
         const response = await fetch(ONLINE_WEBHOOK, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
