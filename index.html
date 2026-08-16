@@ -1948,6 +1948,7 @@
       state.units = [];
       state.chapters = [];
       state.topics = [];
+      state.questionTypes = [];
       state.adjustmentNote = '';
       closeMenus();
       clearError();
@@ -2043,16 +2044,8 @@
     function renderOnlineQuestions(item) {
       const questions = Array.isArray(item?.questions) ? item.questions : [];
       if (!questions.length) {
-       return `
-        <div class="result-panel">
-          <div class="mcq-list">${cards}</div>
-          <div class="button-row">
-            <button type="button" id="createOnlineTestBtn" class="generate">🚀 Create Online Test</button>
-            <div id="createOnlineTestStatus" class="inline-status" aria-live="polite"></div>
-            <div id="onlineTestLinkPanel"></div>
-          </div>
-        </div>`;
-    }
+        return `<div class="result-panel"><p style="margin-bottom:14px">Your online test content is ready, but no structured questions were found in the response.</p><div class="answer-preview">${escapeHTML(JSON.stringify(item, null, 2))}</div></div>`;
+      }
       const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
       const cards = questions.map((q) => {
         const options = Array.isArray(q.options) ? q.options : [];
@@ -2078,10 +2071,10 @@
           <div class="button-row">
             <button type="button" id="createOnlineTestBtn" class="generate">🚀 Create Online Test</button>
             <div id="createOnlineTestStatus" class="inline-status" aria-live="polite"></div>
+            <div id="onlineTestLinkPanel"></div>
           </div>
         </div>`;
     }
-
    function extractFormLink(payload) {
       if (!payload) return '';
       const item = Array.isArray(payload) ? (payload[0] || {}) : payload;
