@@ -2162,13 +2162,23 @@
           selected_topics: state.chapters
         };
       }
-      if (usesUnitChapterHierarchy()) {
+            if (usesUnitChapterHierarchy()) {
+        const groups = getSubjectConfig()?.groups || {};
         return {
           syllabus_hierarchy: 'units_to_chapters',
           units: state.units,
           chapters: state.chapters,
           // Backward-compatible alias for existing workflows that read topics.
           topics: state.chapters,
+          // Unit -> selected-chapters map so the backend can trace each leaf
+          // chapter to its parent unit (drives the Part A/B Employability
+          // Skills split for skill subjects; harmless extra data for others).
+          unit_chapter_map: Object.fromEntries(
+            state.units.map((unit) => [
+              unit,
+              (groups[unit] || []).filter((chapter) => state.chapters.includes(chapter))
+            ])
+          ),
           selected_units: state.units,
           selected_chapters: state.chapters,
           selected_topics: state.chapters
